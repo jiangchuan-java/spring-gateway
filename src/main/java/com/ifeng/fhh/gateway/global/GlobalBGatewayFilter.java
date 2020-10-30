@@ -5,16 +5,15 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
-import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
+import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.filter.ReactiveLoadBalancerClientFilter;
+import org.springframework.cloud.gateway.route.Route;
 import org.springframework.cloud.gateway.support.DelegatingServiceInstance;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
-import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -31,7 +30,7 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
  * @Date: 20-10-28
  */
 @Component
-public class GlobalBGatewayFilter implements GlobalFilter, Ordered{
+public class GlobalBGatewayFilter implements GatewayFilter /*, Ordered*/{
 
 
     private static final Log log = LogFactory
@@ -41,16 +40,10 @@ public class GlobalBGatewayFilter implements GlobalFilter, Ordered{
     @Autowired
     private ReactorLoadBalancer<ServiceInstance> globaLoadBalancer;
 
-    private static final int LOAD_BALANCER_CLIENT_FILTER_ORDER = 10149;
-
-    @Override
-    public int getOrder() {
-        return LOAD_BALANCER_CLIENT_FILTER_ORDER;
-    }
-
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        URI url = exchange.getAttribute(GATEWAY_REQUEST_URL_ATTR);
+        Route route = exchange.getAttribute(GATEWAY_ROUTE_ATTR);
+        URI url = route.getUri();
         String schemePrefix = exchange.getAttribute(GATEWAY_SCHEME_PREFIX_ATTR);
         if (url == null
                 || (!"lb".equals(url.getScheme()) && !"lb".equals(schemePrefix))) {
@@ -117,4 +110,9 @@ public class GlobalBGatewayFilter implements GlobalFilter, Ordered{
     public void setGlobaLoadBalancer(ReactorLoadBalancer<ServiceInstance> globaLoadBalancer) {
         this.globaLoadBalancer = globaLoadBalancer;
     }
+
+   /* @Override
+    public int getOrder() {
+        return 1;
+    }*/
 }

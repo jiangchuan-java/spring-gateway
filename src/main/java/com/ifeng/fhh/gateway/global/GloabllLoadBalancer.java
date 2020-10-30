@@ -9,12 +9,18 @@ import org.springframework.cloud.client.loadbalancer.reactive.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
 import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR;
 
 /**
  * @Des:
@@ -41,7 +47,7 @@ public class GloabllLoadBalancer extends NacosServerDiscoverer implements Reacto
 
     @PostConstruct
     public void initMethod() throws Exception{
-        subscribe(serverName, clusterName, serverAddr, namespace);
+        //subscribe(serverName, clusterName, serverAddr, namespace);
     }
 
     @Override
@@ -53,11 +59,22 @@ public class GloabllLoadBalancer extends NacosServerDiscoverer implements Reacto
         }
         ServerWebExchange exchange = lbRequest.getExchange();
 
+        String serverName = findFirstPath(exchange);
 
         List<ServiceInstance> instanceList = getCurrentServiceInstances();
         ServiceInstance instance = loadBalance.select(instanceList);
 
         return Mono.just(new DefaultResponse(instance));
+    }
+
+    private String findFirstPath(ServerWebExchange exchange) {
+        ServerHttpRequest request = exchange.getRequest();
+        String path = request.getURI().getRawPath();
+
+        String[] split = path.split("/");
+        String firstPath = split[1]; // TODO: 20-10-30 缺少数组安全校验
+
+        return firstPath;
     }
 
     @Override
