@@ -1,4 +1,4 @@
-package com.ifeng.fhh.gateway.business;
+package com.ifeng.fhh.gateway.global;
 
 import com.ifeng.fhh.gateway.loadbalance.AbstractLoadBalance;
 import com.ifeng.fhh.gateway.loadbalance.RandomLoadBalance;
@@ -10,6 +10,7 @@ import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
 import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
@@ -22,19 +23,15 @@ import java.util.List;
  * @Date: 20-10-28
  */
 @Component
-public class ZmtServiceLoadBalancer extends NacosServerDiscoverer implements ReactorServiceInstanceLoadBalancer{
+public class GloabllLoadBalancer extends NacosServerDiscoverer implements ReactorServiceInstanceLoadBalancer{
 
 
-    @Value("${zmt.service.nacos.serverName}")
-    private String serverName;
 
-    @Value("${zmt.service.nacos.clusterName}")
-    private String clusterName;
 
-    @Value("${zmt.service.nacos.serverAddr}")
+    @Value("${nacos.serverAddr}")
     private String serverAddr;
 
-    @Value("${zmt.service.nacos.namespace}")
+    @Value("${nacos.namespace.gateway}")
     private String namespace;
 
     //负载均衡器
@@ -50,6 +47,13 @@ public class ZmtServiceLoadBalancer extends NacosServerDiscoverer implements Rea
     @Override
     public Mono<Response<ServiceInstance>> choose(Request request) {
 
+        GlobalLBRequest lbRequest = null;
+        if(request instanceof GlobalLBRequest){
+            lbRequest = (GlobalLBRequest) request;
+        }
+        ServerWebExchange exchange = lbRequest.getExchange();
+
+
         List<ServiceInstance> instanceList = getCurrentServiceInstances();
         ServiceInstance instance = loadBalance.select(instanceList);
 
@@ -61,25 +65,6 @@ public class ZmtServiceLoadBalancer extends NacosServerDiscoverer implements Rea
         return null;
     }
 
-    @Override
-    public String getServerName() {
-        return serverName;
-    }
-
-    @Override
-    public void setServerName(String serverName) {
-        this.serverName = serverName;
-    }
-
-    @Override
-    public String getClusterName() {
-        return clusterName;
-    }
-
-    @Override
-    public void setClusterName(String clusterName) {
-        this.clusterName = clusterName;
-    }
 
     @Override
     public String getServerAddr() {

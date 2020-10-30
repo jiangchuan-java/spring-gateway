@@ -1,4 +1,4 @@
-package com.ifeng.fhh.gateway.business;
+package com.ifeng.fhh.gateway.global;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -8,8 +8,8 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
-import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.filter.ReactiveLoadBalancerClientFilter;
 import org.springframework.cloud.gateway.support.DelegatingServiceInstance;
 import org.springframework.cloud.gateway.support.NotFoundException;
@@ -25,21 +25,21 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.*
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR;
 
 /**
- * @Des:
+ * @Des: 通用的loadbalancer filter
  * @Author: jiangchuan
  * <p>
  * @Date: 20-10-28
  */
 @Component
-public class ZmtServiceLBGatewayFilter implements GatewayFilter, Ordered{
+public class GlobalBGatewayFilter implements GlobalFilter, Ordered{
 
 
     private static final Log log = LogFactory
-            .getLog(ZmtServiceLBGatewayFilter.class);
+            .getLog(GlobalBGatewayFilter.class);
 
 
     @Autowired
-    private ReactorLoadBalancer<ServiceInstance> loadBalancer;
+    private ReactorLoadBalancer<ServiceInstance> globaLoadBalancer;
 
     private static final int LOAD_BALANCER_CLIENT_FILTER_ORDER = 10149;
 
@@ -97,23 +97,24 @@ public class ZmtServiceLBGatewayFilter implements GatewayFilter, Ordered{
     }
 
     private Mono<Response<ServiceInstance>> choose(ServerWebExchange exchange) {
+
         URI uri = exchange.getAttribute(GATEWAY_REQUEST_URL_ATTR);
-        if (loadBalancer == null) {
+        if (globaLoadBalancer == null) {
             throw new NotFoundException("No loadbalancer available for " + uri.getHost());
         }
-        return loadBalancer.choose(createRequest());
+        return globaLoadBalancer.choose(createRequest(exchange));
     }
 
-    private Request createRequest() {
-        return ReactiveLoadBalancer.REQUEST;
+    private Request createRequest(ServerWebExchange exchange) {
+        return new GlobalLBRequest(exchange);
     }
 
 
-    public ReactorLoadBalancer<ServiceInstance> getLoadBalancer() {
-        return loadBalancer;
+    public ReactorLoadBalancer<ServiceInstance> getGlobaLoadBalancer() {
+        return globaLoadBalancer;
     }
 
-    public void setLoadBalancer(ReactorLoadBalancer<ServiceInstance> loadBalancer) {
-        this.loadBalancer = loadBalancer;
+    public void setGlobaLoadBalancer(ReactorLoadBalancer<ServiceInstance> globaLoadBalancer) {
+        this.globaLoadBalancer = globaLoadBalancer;
     }
 }
