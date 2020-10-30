@@ -50,6 +50,7 @@ public abstract class NacosServerDiscoverer {
         properties.setProperty("username", "zmt");
         properties.setProperty("password", "zmtpwd");
         naming = NamingFactory.createNamingService(properties);
+
         List<Instance> instanceList = naming.selectInstances(serverName, true);
         availableIpList.set(transferTo(instanceList));
         naming.subscribe(serverName, new NacosEventListener());

@@ -1,9 +1,7 @@
 server:
   port: 9090
-zmt:
-  service:
-    nacos:
-      serverName: @zmt.service.nacos.serverName@
-      clusterName: @zmt.service.nacos.clusterName@
-      serverAddr: @nacos.serverAddr@
-      namespace: @zmt.service.nacos.namespace@
+
+nacos:
+  serverAddr: @nacos.serverAddr@
+  namespace:
+    gateway: @nacos.namespace.gateway@

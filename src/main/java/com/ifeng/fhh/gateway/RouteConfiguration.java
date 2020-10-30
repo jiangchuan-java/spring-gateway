@@ -1,6 +1,5 @@
 package com.ifeng.fhh.gateway;
 
-import com.ifeng.fhh.gateway.business.ZmtServiceLBGatewayFilter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
@@ -27,12 +26,12 @@ public class RouteConfiguration {
 
 
     @Bean
-    public RouteLocator myLbRoutes(RouteLocatorBuilder builder, ZmtServiceLBGatewayFilter gatewayFilter) {
+    public RouteLocator myLbRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
                 // Add a simple re-route from: /get to: http://httpbin.org:80
                 // Add a simple "Hello:World" HTTP Header
-                .route(r-> r.path("/zmt-service/**").filters(f->f.stripPrefix(1).filters(gatewayFilter))
-                        .uri("lb://zmt-service")) // forward to httpbin
+                .route(r-> r.path("/**").filters(f->f.stripPrefix(1))
+                        .uri("lb://")) // forward to httpbin
                 .build();
     }
 }
