@@ -12,7 +12,6 @@
 
     <properties>
         <spring.version>2.2.5.RELEASE</spring.version>
-        <nacos.version>1.2.1</nacos.version>
     </properties>
 
     <dependencies>
@@ -34,7 +33,7 @@
         <dependency>
             <groupId>com.alibaba.nacos</groupId>
             <artifactId>nacos-client</artifactId>
-            <version>${nacos.version}</version>
+            <version>1.2.1</version>
             <exclusions>
                 <exclusion>
                     <artifactId>jackson-core</artifactId>
@@ -47,6 +46,13 @@
             </exclusions>
         </dependency>
 
+        <!--apollo-->
+        <dependency>
+            <groupId>com.ctrip.framework.apollo</groupId>
+            <artifactId>apollo-client</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+
     </dependencies>
 
     <profiles>
@@ -54,7 +60,9 @@
             <id>fhh-gateway-test</id>
             <properties>
                 <nacos.serverAddr>http://test-nacos.ifeng.com:80</nacos.serverAddr>
-                <nacos.namespace.gateway>a327cfcf-c595-4780-a176-9f7949efa468</nacos.namespace.gateway>
+                <nacos.namespace.gateway>74fcd40c-a7c4-4f01-b868-2b5c9ca542ca</nacos.namespace.gateway>
+                <app.id>fhh-gateway</app.id>
+                <apollo.meta>http://10.21.7.28:9991/</apollo.meta>
             </properties>
 
         </profile>

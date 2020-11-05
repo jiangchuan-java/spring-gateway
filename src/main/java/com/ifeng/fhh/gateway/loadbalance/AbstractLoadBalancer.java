@@ -12,7 +12,7 @@ import java.util.Objects;
  * <p>
  * @Date: 20-10-29
  */
-public abstract class AbstractLoadBalance {
+public abstract class AbstractLoadBalancer {
 
 
     public ServiceInstance select(List<ServiceInstance> instances) {

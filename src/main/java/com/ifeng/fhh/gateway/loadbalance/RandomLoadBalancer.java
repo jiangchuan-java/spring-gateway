@@ -1,6 +1,7 @@
 package com.ifeng.fhh.gateway.loadbalance;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -11,7 +12,8 @@ import java.util.concurrent.ThreadLocalRandom;
  * <p>
  * @Date: 20-10-29
  */
-public class RandomLoadBalance extends AbstractLoadBalance{
+@Component
+public class RandomLoadBalancer extends AbstractLoadBalancer {
 
     public static final String NAME = "random";
 

@@ -1,4 +1,4 @@
-package com.ifeng.fhh.gateway.global;
+package com.ifeng.fhh.gateway.filter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -7,13 +7,14 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
-import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.filter.ReactiveLoadBalancerClientFilter;
 import org.springframework.cloud.gateway.route.Route;
 import org.springframework.cloud.gateway.support.DelegatingServiceInstance;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -24,21 +25,28 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.*
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR;
 
 /**
- * @Des: 通用的loadbalancer filter
+ * @Des: 用于替代ReactiveLoadBalancerClientFilter, 所以排序是 10150 - 1 的逻辑
+ * 之所以替换是因为原本的filter不是很完善，等后续完善了在使用吧
  * @Author: jiangchuan
  * <p>
  * @Date: 20-10-28
  */
 @Component
-public class GlobalBGatewayFilter implements GatewayFilter /*, Ordered*/{
+public class GlobalBGatewayFilterFactory implements GlobalFilter, Ordered {
 
 
     private static final Log log = LogFactory
-            .getLog(GlobalBGatewayFilter.class);
+            .getLog(GlobalBGatewayFilterFactory.class);
+
+    @Override
+    public int getOrder() {
+        return 10150 - 1;
+    }
 
 
     @Autowired
-    private ReactorLoadBalancer<ServiceInstance> globaLoadBalancer;
+    private ReactorLoadBalancer<ServiceInstance> lBInstanceChooser;
+
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -82,8 +90,17 @@ public class GlobalBGatewayFilter implements GatewayFilter /*, Ordered*/{
                 log.trace("LoadBalancerClientFilter url chosen: " + requestUrl);
             }
             exchange.getAttributes().put(GATEWAY_REQUEST_URL_ATTR, requestUrl);
+            exchange.getAttributes().put("jiangchuan","chuan");
+            long end = System.currentTimeMillis();
         }).then(chain.filter(exchange));
+
     }
+
+
+    public static class Config {
+        //Put the configuration properties for your filter here
+    }
+
 
     protected URI reconstructURI(ServiceInstance serviceInstance, URI original) {
         return LoadBalancerUriTools.reconstructURI(serviceInstance, original);
@@ -92,27 +109,39 @@ public class GlobalBGatewayFilter implements GatewayFilter /*, Ordered*/{
     private Mono<Response<ServiceInstance>> choose(ServerWebExchange exchange) {
 
         URI uri = exchange.getAttribute(GATEWAY_REQUEST_URL_ATTR);
-        if (globaLoadBalancer == null) {
+        if (lBInstanceChooser == null) {
             throw new NotFoundException("No loadbalancer available for " + uri.getHost());
         }
-        return globaLoadBalancer.choose(createRequest(exchange));
+        return lBInstanceChooser.choose(createRequest(exchange));
     }
 
     private Request createRequest(ServerWebExchange exchange) {
-        return new GlobalLBRequest(exchange);
+        return new LBRequest(exchange);
     }
 
+    public static class LBRequest implements Request {
 
-    public ReactorLoadBalancer<ServiceInstance> getGlobaLoadBalancer() {
-        return globaLoadBalancer;
+        private ServerWebExchange exchange;
+
+
+        public LBRequest(ServerWebExchange exchange) {
+            this.exchange = exchange;
+        }
+
+        public ServerWebExchange getExchange() {
+            return exchange;
+        }
+
+        public void setExchange(ServerWebExchange exchange) {
+            this.exchange = exchange;
+        }
     }
 
-    public void setGlobaLoadBalancer(ReactorLoadBalancer<ServiceInstance> globaLoadBalancer) {
-        this.globaLoadBalancer = globaLoadBalancer;
+    public ReactorLoadBalancer<ServiceInstance> getlBInstanceChooser() {
+        return lBInstanceChooser;
     }
 
-   /* @Override
-    public int getOrder() {
-        return 1;
-    }*/
+    public void setlBInstanceChooser(ReactorLoadBalancer<ServiceInstance> lBInstanceChooser) {
+        this.lBInstanceChooser = lBInstanceChooser;
+    }
 }

@@ -5,3 +5,8 @@ nacos:
   serverAddr: @nacos.serverAddr@
   namespace:
     gateway: @nacos.namespace.gateway@
+
+app:
+  id: @app.id@
+apollo:
+  meta: @apollo.meta@

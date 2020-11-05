@@ -1,16 +1,20 @@
-package com.ifeng.fhh.gateway.nacos;
+package com.ifeng.fhh.gateway.discover.nacos;
 
+import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.listener.Event;
 import com.alibaba.nacos.api.naming.listener.EventListener;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
+import com.ifeng.fhh.gateway.discover.AbstractInstanceDiscover;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @Des: Nacos服务发现
@@ -18,43 +22,32 @@ import java.util.concurrent.atomic.AtomicReference;
  * <p>
  * @Date: 20-6-15
  */
-public abstract class NacosServerDiscoverer {
+@Component
+public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
+
+    private NamingService namingService;
 
 
-    private NamingService naming;
+    private String serverAddr;
 
-    private String serverName; /*要监听哪个服务*/
-
-    private String clusterName; /*要监听哪个集群*/
-
-    private String serverAddr; /*nacos地址*/
-
-    private String namespace; /*整个相似服务的命名空间*/
-
-    private AtomicReference<List<ServiceInstance>> availableIpList = new AtomicReference<>(new LinkedList<>());
+    private String namespace;
 
 
+    private ConcurrentHashMap<String/*serverName*/, List<ServiceInstance>/*可用实例实例*/> serverInstanceCache = new ConcurrentHashMap<>();
 
 
-    //订阅nacos
-    public void subscribe(String serverName, String clusterName, String serverAddr, String namespace) throws Exception {
-        this.serverName = serverName;
-        this.clusterName = clusterName;
+    public NacosInstanceDiscoverer(@Value("${nacos.serverAddr}")String serverAddr, @Value("${nacos.namespace.gateway}")String namespace) throws Exception{
         this.serverAddr = serverAddr;
         this.namespace = namespace;
 
         Properties properties = new Properties();
         properties.setProperty("serverAddr", serverAddr);
         properties.setProperty("namespace", namespace);
-        properties.setProperty("clusterName", clusterName);
         properties.setProperty("username", "zmt");
         properties.setProperty("password", "zmtpwd");
-        naming = NamingFactory.createNamingService(properties);
-
-        List<Instance> instanceList = naming.selectInstances(serverName, true);
-        availableIpList.set(transferTo(instanceList));
-        naming.subscribe(serverName, new NacosEventListener());
+        namingService = NamingFactory.createNamingService(properties);
     }
+
 
 
     /**
@@ -64,8 +57,10 @@ public abstract class NacosServerDiscoverer {
         @Override
         public void onEvent(Event event) {
             if (event instanceof NamingEvent) {
-                List<Instance> instanceList = ((NamingEvent) event).getInstances();
-                availableIpList.set(transferTo(instanceList));
+                List<Instance> nacosInstanceList = ((NamingEvent) event).getInstances();
+                List<ServiceInstance> serviceInstanceList = transferTo(nacosInstanceList);
+                String serviceName = ((NamingEvent) event).getServiceName();
+                serverInstanceCache.put(serviceName, serviceInstanceList);
             }
         }
     }
@@ -94,11 +89,23 @@ public abstract class NacosServerDiscoverer {
 
     /**
      * 返回当前的实例列表
-     *
      * @return
      */
-    public List<ServiceInstance> getCurrentServiceInstances() {
-        return availableIpList.get();
+    @Override
+    public List<ServiceInstance> getCurrentServiceInstances(String host) {
+        List<ServiceInstance> serverInstanceList = serverInstanceCache.get(host);
+        if(Objects.isNull(serverInstanceList)){
+            try {
+                List<Instance> nacosInstanceList = namingService.selectInstances(host, true);
+                namingService.subscribe(host, new NacosEventListener());
+                serverInstanceList = transferTo(nacosInstanceList);
+                serverInstanceCache.put(host, serverInstanceList);
+            } catch (NacosException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        return serverInstanceList;
     }
 
 
@@ -115,23 +122,8 @@ public abstract class NacosServerDiscoverer {
         return namespace;
     }
 
-    public String getServerName() {
-        return serverName;
-    }
-
-    public void setServerName(String serverName) {
-        this.serverName = serverName;
-    }
-
     public void setNamespace(String namespace) {
         this.namespace = namespace;
     }
 
-    public String getClusterName() {
-        return clusterName;
-    }
-
-    public void setClusterName(String clusterName) {
-        this.clusterName = clusterName;
-    }
 }
