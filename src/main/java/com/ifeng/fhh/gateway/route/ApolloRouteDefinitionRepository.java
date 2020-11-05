@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.ctrip.framework.apollo.Config;
 import com.ifeng.fhh.gateway.filter.AuthorityGatewayFilterFactory;
 import com.ifeng.fhh.gateway.util.JackSonUtils;
+import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
 import org.springframework.cloud.gateway.filter.FilterDefinition;
 import org.springframework.cloud.gateway.filter.factory.StripPrefixGatewayFilterFactory;
 import static org.springframework.cloud.gateway.filter.factory.StripPrefixGatewayFilterFactory.PARTS_KEY;
@@ -13,6 +14,8 @@ import org.springframework.cloud.gateway.handler.predicate.PredicateDefinition;
 import org.springframework.cloud.gateway.route.Route;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionRepository;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -33,7 +36,7 @@ import static org.springframework.cloud.gateway.support.NameUtils.normalizeRoute
  * @Date: 20-11-3
  */
 @Repository
-public class ApolloRouteDefinitionRepository implements RouteDefinitionRepository {
+public class ApolloRouteDefinitionRepository implements RouteDefinitionRepository, ApplicationEventPublisherAware {
 
     private Config apolloConfig;
 
@@ -42,6 +45,8 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
     private ConcurrentHashMap<String/*servername*/, Route/*路由定义*/> routeCache = new ConcurrentHashMap<>();
 
     private static final String ROUTE_DEFINITION_NAMESPACE = "route-definition";
+
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private static final List<PredicateDefinition> defalutPD = new ArrayList<>();
     private static final List<FilterDefinition> defaultFD = new ArrayList<>();
@@ -77,8 +82,9 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
         jsonObject.put("serviceId","zmt-service");
         jsonObject.put("uri","lb://fhh-test");
         RouteDefinition routeDefinition = buildRouteDefinition(jsonObject.toJSONString());
-        routeDefinitionCache.put("zmt-service", routeDefinition);
+        routeDefinitionCache.put(routeDefinition.getId(), routeDefinition);
     }
+
 
     private RouteDefinition buildRouteDefinition(String routeDefinitionValue) {
         try {
@@ -120,6 +126,12 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
     @Override
     public Mono<Void> delete(Mono<String> routeId) {
         return null;
+    }
+
+
+    @Override
+    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     private static class ApolloRouteModel {
