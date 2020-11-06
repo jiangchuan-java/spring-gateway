@@ -20,6 +20,8 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.s
  *
  * ${filterName}GatewayFilterFactory
  *
+ * 网关内，最好还是做全局的配置，具体的权限，还是由业务自己去控制吧
+ *
  * @Author: jiangchuan
  * <p>
  * @Date: 20-11-5

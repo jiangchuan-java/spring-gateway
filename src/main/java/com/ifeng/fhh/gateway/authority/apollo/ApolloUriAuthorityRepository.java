@@ -15,7 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
- * @Des: 动态路由仓库
+ * @Des: 动态权限仓库
+ * 不用了，网关还是做全局的事情吧，具体业务的权限控制，还是让业务本身去处理吧
  * @Author: jiangchuan
  * <p>
  * @Date: 20-11-3
@@ -56,8 +57,13 @@ public class ApolloUriAuthorityRepository extends AbstractUriAuthorityRepository
         jsonObject2.put("uri","/operator/account/insert");
         jsonObject2.put("roleId","manager_zmt_operator_account_add");
 
+        JSONObject jsonObject3 = new JSONObject();
+        jsonObject3.put("uri","/account/offlineRecord/sendMail");
+        jsonObject3.put("roleId","manager_zmt_admin");
+
         jsonArray.add(jsonObject1);
         jsonArray.add(jsonObject2);
+        jsonArray.add(jsonObject3);
         jsonObject.put("authorityConfigList", jsonArray);
 
         buildAuthority(jsonObject.toJSONString());

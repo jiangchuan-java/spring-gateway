@@ -10,3 +10,7 @@ app:
   id: @app.id@
 apollo:
   meta: @apollo.meta@
+
+
+authorization:
+  url: @authorization.url@

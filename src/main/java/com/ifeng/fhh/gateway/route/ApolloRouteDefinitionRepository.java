@@ -58,10 +58,10 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
         stripPrefix.addArg(PARTS_KEY, "1");
         defaultFD.add(stripPrefix);
 
-        //权限校验
+        /*//权限校验
         FilterDefinition authority = new FilterDefinition();
         authority.setName(normalizeFilterFactoryName(AuthorityGatewayFilterFactory.class));
-        defaultFD.add(authority);
+        defaultFD.add(authority);*/
     }
 
     public ApolloRouteDefinitionRepository(){

@@ -46,11 +46,24 @@
             </exclusions>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/junit/junit -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+        </dependency>
+
         <!--apollo-->
         <dependency>
             <groupId>com.ctrip.framework.apollo</groupId>
             <artifactId>apollo-client</artifactId>
             <version>1.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpasyncclient</artifactId>
+            <version>4.1.4</version>
         </dependency>
 
     </dependencies>
@@ -63,6 +76,7 @@
                 <nacos.namespace.gateway>74fcd40c-a7c4-4f01-b868-2b5c9ca542ca</nacos.namespace.gateway>
                 <app.id>fhh-gateway</app.id>
                 <apollo.meta>http://10.21.7.28:9991/</apollo.meta>
+                <authorization.url>https://test0.auth-server.cpdt.ifengidc.com/userRole</authorization.url>
             </properties>
 
         </profile>
