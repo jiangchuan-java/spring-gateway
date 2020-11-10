@@ -28,7 +28,7 @@ public class AuthorityValidator {
     @Autowired
     private HttpClientTemplate httpClientTemplate;
 
-    @Value("${authorization.url}")
+    @Value("null")
     private String authorUrl;
 
     public Mono<Boolean> validate(String serverId, String path, String token){

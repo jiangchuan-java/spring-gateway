@@ -2,8 +2,11 @@ package com.ifeng.fhh.gateway.route;
 
 import com.alibaba.fastjson.JSONObject;
 import com.ctrip.framework.apollo.Config;
+import com.ctrip.framework.apollo.ConfigService;
 import com.ifeng.fhh.gateway.filter.AuthorityGatewayFilterFactory;
 import com.ifeng.fhh.gateway.util.JackSonUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
 import org.springframework.cloud.gateway.filter.FilterDefinition;
 import org.springframework.cloud.gateway.filter.factory.StripPrefixGatewayFilterFactory;
@@ -23,6 +26,8 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -38,11 +43,13 @@ import static org.springframework.cloud.gateway.support.NameUtils.normalizeRoute
 @Repository
 public class ApolloRouteDefinitionRepository implements RouteDefinitionRepository, ApplicationEventPublisherAware {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApolloRouteDefinitionRepository.class);
+
     private Config apolloConfig;
 
     private ConcurrentHashMap<String/*servername*/, RouteDefinition/*路由定义*/> routeDefinitionCache = new ConcurrentHashMap<>();
 
-    private ConcurrentHashMap<String/*servername*/, Route/*路由定义*/> routeCache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String/*serviveId*/, Route/*路由定义*/> routeCache = new ConcurrentHashMap<>();
 
     private static final String ROUTE_DEFINITION_NAMESPACE = "route-definition";
 
@@ -57,32 +64,35 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
         stripPrefix.setName(normalizeFilterFactoryName(StripPrefixGatewayFilterFactory.class));
         stripPrefix.addArg(PARTS_KEY, "1");
         defaultFD.add(stripPrefix);
-
-        /*//权限校验
-        FilterDefinition authority = new FilterDefinition();
-        authority.setName(normalizeFilterFactoryName(AuthorityGatewayFilterFactory.class));
-        defaultFD.add(authority);*/
     }
 
     public ApolloRouteDefinitionRepository(){
-        //apolloConfig = ConfigService.getConfig(ROUTE_DEFINITION_NAMESPACE);
+        apolloConfig = ConfigService.getConfig(ROUTE_DEFINITION_NAMESPACE);
         initCache();
     }
 
+    /**
+     *
+     * 注意 serviceId 是请求时，用于区分业务的
+     *     lb://xxx 中 xxx代表的是naocs 服务名称
+     *
+     * JSONObject jsonObject = new JSONObject();
+     * jsonObject.put("serviceId","zmt-service");
+     * jsonObject.put("uri","lb://fhh-test");
+     * RouteDefinition routeDefinition = buildRouteDefinition(jsonObject.toJSONString());
+     * routeDefinitionCache.put(routeDefinition.getId(), routeDefinition);
+     *
+     */
     private void initCache(){
-        /*Set<String> serverNameSet = apolloConfig.getPropertyNames();
+        Set<String> serverNameSet = apolloConfig.getPropertyNames();
         for(String serverName : serverNameSet){
             String routeDefinitionValue = apolloConfig.getProperty(serverName, null);
             RouteDefinition routeDefinition = buildRouteDefinition(routeDefinitionValue);
             if(Objects.nonNull(routeDefinition)){
                 routeDefinitionCache.put(serverName, routeDefinition);
             }
-        }*/
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("serviceId","zmt-service");
-        jsonObject.put("uri","lb://fhh-test");
-        RouteDefinition routeDefinition = buildRouteDefinition(jsonObject.toJSONString());
-        routeDefinitionCache.put(routeDefinition.getId(), routeDefinition);
+        }
+
     }
 
 
@@ -103,6 +113,8 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
             routeDefinition.setPredicates(predicateDef);
             routeDefinition.setFilters(defaultFD);
             routeDefinition.setId(model.getServiceId());
+
+            LOGGER.info("build new route : {}", routeDefinition.toString());
 
             return routeDefinition;
 
