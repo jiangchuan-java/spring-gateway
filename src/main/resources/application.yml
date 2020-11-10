@@ -11,3 +11,23 @@ app:
 apollo:
   meta: @apollo.meta@
 
+management:
+  endpoint:
+    health:
+      enabled: true
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: '*'
+      path-mapping:
+        metrics: _metrics
+        prometheus: metrics
+  metrics:
+    distribution:
+      percentiles-histogram[http.server.requests]: true
+      sla[http.server.requests]:
