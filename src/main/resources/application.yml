@@ -1,5 +1,5 @@
 server:
-  port: 9090
+  port: 8080
 
 nacos:
   serverAddr: @nacos.serverAddr@
@@ -11,6 +11,3 @@ app:
 apollo:
   meta: @apollo.meta@
 
-
-authorization:
-  url: @authorization.url@
