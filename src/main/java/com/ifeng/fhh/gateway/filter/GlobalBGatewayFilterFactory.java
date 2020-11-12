@@ -65,9 +65,9 @@ public class GlobalBGatewayFilterFactory implements GlobalFilter, Ordered {
                     + " url before: " + url);
         }
 
-        return choose(exchange).doOnNext(response -> {
+        return choose(exchange).doOnNext(serverInstance -> {
 
-            if (!response.hasServer()) {
+            if (!serverInstance.hasServer()) {
                 throw NotFoundException.create(true,
                         "Unable to find instance for " + url.getHost());
             }
@@ -82,7 +82,7 @@ public class GlobalBGatewayFilterFactory implements GlobalFilter, Ordered {
             }
 
             DelegatingServiceInstance serviceInstance = new DelegatingServiceInstance(
-                    response.getServer(), overrideScheme);
+                    serverInstance.getServer(), overrideScheme);
 
             URI requestUrl = reconstructURI(serviceInstance, uri);
 
@@ -90,7 +90,6 @@ public class GlobalBGatewayFilterFactory implements GlobalFilter, Ordered {
                 log.trace("LoadBalancerClientFilter url chosen: " + requestUrl);
             }
             exchange.getAttributes().put(GATEWAY_REQUEST_URL_ATTR, requestUrl);
-            exchange.getAttributes().put("jiangchuan","chuan");
             long end = System.currentTimeMillis();
         }).then(chain.filter(exchange));
 
