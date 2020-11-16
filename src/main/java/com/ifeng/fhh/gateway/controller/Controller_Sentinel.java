@@ -84,6 +84,6 @@ public class Controller_Sentinel {
         Mono<String> mono = Mono.fromFuture(completableFuture);
         return mono;*/
         longAdder.add(1);
-        return Mono.just("ok");
+        return Mono.just(""+longAdder.sum());
     }
 }
