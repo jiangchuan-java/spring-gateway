@@ -52,7 +52,7 @@ public class Controller_Sentinel {
         initFlowQpsRule();
     }
 
-    private LongAdder longAdder;
+    private LongAdder longAdder = new LongAdder();
 
     @RequestMapping("/st")
     public Mono<String> testResilience4j(){
