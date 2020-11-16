@@ -3,6 +3,8 @@ package com.ifeng.fhh.gateway.controller;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -23,6 +25,8 @@ import java.util.function.Supplier;
 @ResponseBody
 public class Controller_4j {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Controller_4j.class);
+
     static CircuitBreakerConfig breakerConfig;
     static CircuitBreakerRegistry registry;
     static CircuitBreaker breaker;
@@ -41,6 +45,7 @@ public class Controller_4j {
     @RequestMapping("/4j")
     public Mono<String> testResilience4j(){
 
+        LOGGER.info("4j : {}", Thread.currentThread().getName());
 
         Supplier<CompletionStage<String>> completionStageSupplier = CircuitBreaker.decorateCompletionStage(breaker, () -> {
             CompletableFuture<String> completableFuture = new CompletableFuture<>();

@@ -8,6 +8,8 @@ import com.alibaba.csp.sentinel.slots.block.RuleConstant;
 import com.alibaba.csp.sentinel.slots.block.degrade.DegradeRule;
 import com.alibaba.csp.sentinel.slots.block.degrade.DegradeRuleManager;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -30,6 +32,8 @@ import java.util.function.Supplier;
 public class Controller_Sentinel {
 
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Controller_Sentinel.class);
+
     private static void initFlowQpsRule () {
         List<DegradeRule> rules = new ArrayList<>();
         DegradeRule rule = new DegradeRule();
@@ -51,6 +55,7 @@ public class Controller_Sentinel {
     @RequestMapping("/st")
     public Mono<String> testResilience4j(){
 
+        LOGGER.info("st : {}", Thread.currentThread().getName());
 
         CompletableFuture<String> completableFuture = new CompletableFuture<>();
 
