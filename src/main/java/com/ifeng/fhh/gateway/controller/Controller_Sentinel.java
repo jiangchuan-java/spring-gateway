@@ -1,6 +1,7 @@
 package com.ifeng.fhh.gateway.controller;
 
 import com.alibaba.csp.sentinel.Entry;
+import com.alibaba.csp.sentinel.SphO;
 import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.Tracer;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
@@ -52,23 +53,19 @@ public class Controller_Sentinel {
         initFlowQpsRule();
     }
 
-    private LongAdder longAdder = new LongAdder();
 
     @RequestMapping("/st")
     public Mono<String> testResilience4j(){
 
-        /*LOGGER.info("st : {}", Thread.currentThread().getName());
+        LOGGER.info("st : {}", Thread.currentThread().getName());
 
         CompletableFuture<String> completableFuture = new CompletableFuture<>();
 
         Entry entry = null;
         try {
-
-            *//*entry = SphO.entry("helloWrold"); Sph0获取资源失败，返回false，内部捕获所有异常*//*
+            //entry = SphO.entry("helloWrold"); Sph0获取资源失败，返回false，内部捕获所有异常
             entry = SphU.entry("api"); //SphU获取资源失败，抛出BlockException异常
             completableFuture.complete("ok");
-
-
         } catch (Throwable t) {
             if (!BlockException.isBlockException(t)) {
                 Tracer.trace(t);
@@ -82,8 +79,6 @@ public class Controller_Sentinel {
             }
         }
         Mono<String> mono = Mono.fromFuture(completableFuture);
-        return mono;*/
-        longAdder.add(1);
-        return Mono.just(""+longAdder.sum());
+        return mono;
     }
 }
