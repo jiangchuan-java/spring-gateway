@@ -41,11 +41,12 @@ public class Controller_4j {
          registry = CircuitBreakerRegistry.of(breakerConfig);
          breaker = registry.circuitBreaker("api");
     }
+    private int i = 0;
 
     @RequestMapping("/4j")
     public Mono<String> testResilience4j(){
 
-        LOGGER.info("4j : {}", Thread.currentThread().getName());
+       /* LOGGER.info("4j : {}", Thread.currentThread().getName());
 
         Supplier<CompletionStage<String>> completionStageSupplier = CircuitBreaker.decorateCompletionStage(breaker, () -> {
             CompletableFuture<String> completableFuture = new CompletableFuture<>();
@@ -56,7 +57,11 @@ public class Controller_4j {
         CompletionStage<String> stringCompletionStage = completionStageSupplier.get();
 
         Mono<String> mono = Mono.fromCompletionStage(stringCompletionStage);
-        return mono;
+        return mono;*/
+       synchronized (this) {
+           i++;
+       }
 
+       return Mono.just("ok");
     }
 }
