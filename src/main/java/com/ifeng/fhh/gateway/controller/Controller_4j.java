@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.Hashtable;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Supplier;
@@ -44,14 +42,10 @@ public class Controller_4j {
          breaker = registry.circuitBreaker("api");
     }
 
-    static Hashtable<Integer, Integer> hashtable = new Hashtable<>();
-
-    static Random random = new Random();
-
     @RequestMapping("/4j")
     public Mono<String> testResilience4j(){
 
-        /*LOGGER.info("4j : {}", Thread.currentThread().getName());
+        LOGGER.info("4j : {}", Thread.currentThread().getName());
 
         Supplier<CompletionStage<String>> completionStageSupplier = CircuitBreaker.decorateCompletionStage(breaker, () -> {
             CompletableFuture<String> completableFuture = new CompletableFuture<>();
@@ -62,10 +56,7 @@ public class Controller_4j {
         CompletionStage<String> stringCompletionStage = completionStageSupplier.get();
 
         Mono<String> mono = Mono.fromCompletionStage(stringCompletionStage);
-        return mono;*/
-        int item = random.nextInt(1000000);
-        hashtable.put(item, item);
-        return Mono.just("ok");
+        return mono;
 
     }
 }

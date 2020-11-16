@@ -17,10 +17,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
@@ -53,22 +51,18 @@ public class Controller_Sentinel {
         initFlowQpsRule();
     }
 
-    static ConcurrentHashMap<Integer, Integer> hashMap = new ConcurrentHashMap<>();
-
-    static Random random = new Random();
-
 
     @RequestMapping("/st")
     public Mono<String> testResilience4j(){
 
-        /*LOGGER.info("st : {}", Thread.currentThread().getName());
+        LOGGER.info("st : {}", Thread.currentThread().getName());
 
         CompletableFuture<String> completableFuture = new CompletableFuture<>();
 
         Entry entry = null;
         try {
 
-            *//*entry = SphO.entry("helloWrold"); Sph0获取资源失败，返回false，内部捕获所有异常*//*
+            /*entry = SphO.entry("helloWrold"); Sph0获取资源失败，返回false，内部捕获所有异常*/
             entry = SphU.entry("api"); //SphU获取资源失败，抛出BlockException异常
             completableFuture.complete("ok");
 
@@ -86,9 +80,6 @@ public class Controller_Sentinel {
             }
         }
         Mono<String> mono = Mono.fromFuture(completableFuture);
-        return mono;*/
-        int item = random.nextInt(1000000);
-        hashMap.put(item, item);
-        return Mono.just("ok");
+        return mono;
     }
 }
