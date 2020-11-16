@@ -1,9 +1,18 @@
+import io.github.resilience4j.bulkhead.Bulkhead;
+import io.github.resilience4j.bulkhead.BulkheadConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.timelimiter.TimeLimiter;
+import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import org.junit.Test;
 
 import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * @Des:
@@ -14,21 +23,140 @@ import java.time.Duration;
 public class ResilienceTest {
 
     @Test
-    public void circuitBreaker() {
+    public void circuitBreakerAsync() throws Exception{
+        CircuitBreakerConfig breakerConfig = CircuitBreakerConfig.custom()
+                .ringBufferSizeInClosedState(4) // 断路器关闭状态下队列的大小，队列满了之后，触发失败比例的计算
+                .failureRateThreshold(50) //失败比例
+                .waitDurationInOpenState(Duration.ofSeconds(5)) //断路器开启后保持多久
+                .ringBufferSizeInHalfOpenState(2) //在试探时的队列大小，满了计算失败比例
+                .build();
+
+        TimeLimiterConfig timeConfig = TimeLimiterConfig.custom()
+                .timeoutDuration(Duration.ofSeconds(1))
+                .cancelRunningFuture(true)
+                .build();
+        TimeLimiter timeLimiter = TimeLimiter.of(timeConfig);
+
+
+        CircuitBreakerRegistry registry = CircuitBreakerRegistry.of(breakerConfig);
+        CircuitBreaker breaker = registry.circuitBreaker("dao");
+
+
+        Supplier<CompletionStage<String>> completionStageSupplier = CircuitBreaker.decorateCompletionStage(breaker, () -> {
+            CompletableFuture<String> completableFuture = new CompletableFuture<>();
+            completableFuture.completeExceptionally(new RuntimeException("异步任务失败了"));
+            return completableFuture;
+        });
+
+
+
+        for(int i=0;i<15;i++){
+            try {
+                CompletionStage<String> stringCompletionStage = completionStageSupplier.get();
+                stringCompletionStage.whenComplete((str,throwable)->{
+                    System.out.println(throwable);
+                    System.out.println(str);
+                });
+
+                TimeUnit.SECONDS.sleep(1);
+            }catch (Exception e){
+
+            }
+
+        }
+
+
+        System.in.read();
+    }
+
+
+    @Test
+    public void circuitBreakerSync() throws Exception{
         CircuitBreakerConfig config = CircuitBreakerConfig.custom()
-                .failureRateThreshold(50)
-                .waitDurationInOpenState(Duration.ofSeconds(10))
-                .ringBufferSizeInHalfOpenState(2)
-                .ringBufferSizeInClosedState(2)
+                .ringBufferSizeInClosedState(4) // 断路器关闭状态下队列的大小，队列满了之后，触发失败比例的计算
+                .failureRateThreshold(50) //失败比例
+                .waitDurationInOpenState(Duration.ofSeconds(5)) //断路器开启后保持多久
+                .ringBufferSizeInHalfOpenState(2) //在试探时的队列大小，满了计算失败比例
                 .build();
 
         CircuitBreakerRegistry registry = CircuitBreakerRegistry.of(config);
         CircuitBreaker breaker1 = registry.circuitBreaker("dao");
-        CircuitBreaker breaker2 = registry.circuitBreaker("redis");
 
-        breaker1.onError(0, new RuntimeException());
-        System.out.println(breaker1.getState());
-        breaker1.onError(0, new RuntimeException());
-        System.out.println(breaker1.getState());
+
+        Runnable runnable = CircuitBreaker.decorateRunnable(breaker1, new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                    System.out.println(Thread.currentThread().getName());
+                    throw new RuntimeException("主动失败");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        for(int i=0;i<15;i++){
+            try {
+                TimeUnit.SECONDS.sleep(1);
+                System.out.println(i + " " + breaker1.getState());
+                runnable.run();
+            }catch (Exception e){
+
+            }
+
+        }
+
+        System.in.read();
+    }
+
+
+    @Test
+    public void circuitTimeLimiter() throws Exception{
+
+
+        TimeLimiterConfig timeConfig = TimeLimiterConfig.custom()
+                .timeoutDuration(Duration.ofSeconds(1))
+                .cancelRunningFuture(true)
+                .build();
+        TimeLimiter timeLimiter = TimeLimiter.of(timeConfig);
+
+        System.in.read();
+    }
+
+
+    @Test
+    public void circuitBulkhead() throws Exception{
+
+        BulkheadConfig bulkconfig = BulkheadConfig.custom()
+                .maxConcurrentCalls(5)
+                .build();
+
+        Bulkhead bulkhead = Bulkhead.of("bulk", bulkconfig);
+
+        Runnable runnable = Bulkhead.decorateRunnable(bulkhead, new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    System.out.println(Thread.currentThread().getName());
+                    TimeUnit.SECONDS.sleep(5); //阻塞在这里
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
+        for(int i=0;i<15;i++){
+            try {
+                Thread t = new Thread(runnable);
+                t.start();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+        }
+
+        System.in.read();
     }
 }
