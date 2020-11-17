@@ -40,6 +40,8 @@ public class GlobalMonitorGatewayFilter implements GlobalFilter, Ordered {
 
         return chain.filter(exchange).then(Mono.fromRunnable(()->{
             requestTimer.observeDuration();
+            long contentLength = exchange.getResponse().getHeaders().getContentLength();
+            LOGGER.info(requestPath+" resp : "+contentLength);
         }));
     }
 

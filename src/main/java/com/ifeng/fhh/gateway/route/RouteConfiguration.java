@@ -37,7 +37,7 @@ public class RouteConfiguration {
                 .build();
     }
 
-    @Bean
+    //@Bean
     public GlobalFilter postGlobalFilter() {
         return new GlobalFilter() {
             @Override
