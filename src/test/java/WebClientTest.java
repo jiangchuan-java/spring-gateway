@@ -3,6 +3,8 @@ import com.ifeng.fhh.gateway.util.httpclient.HttpClientTemplate;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @Des:
  * @Author: jiangchuan
@@ -20,13 +22,18 @@ public class WebClientTest {
     public void testApacheHttpClient() throws Exception {
         HttpClientTemplate template = new ApacheAsyncHttpClient();
 
-        Mono<String> mono = template.get("http://local.fhhapi-service.ifengidc.com/account/enumList");
 
-        mono.subscribe(resp->{
-            System.out.println(resp);
-        });
+            Mono<String> mono = template.get("http://local-fhh-gateway.ifengidc.com/zmt-service/account/enumList");
 
-        System.in.read();
+            mono.subscribe(resp -> {
+                System.out.println(resp);
+            });
+
+            TimeUnit.MICROSECONDS.sleep(200);
+
+
+       // System.in.read();
     }
+
 
 }
