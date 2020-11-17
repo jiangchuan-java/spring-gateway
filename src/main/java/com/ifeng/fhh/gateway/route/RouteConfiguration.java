@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 public class RouteConfiguration {
 
 
-    @Bean
+    //@Bean
     public RouteLocator myLbRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
                 // Add a simple re-route from: /get to: http://httpbin.org:80
