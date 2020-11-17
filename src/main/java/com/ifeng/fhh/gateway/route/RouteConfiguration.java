@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 public class RouteConfiguration {
 
 
-    //@Bean
+    @Bean
     public RouteLocator myLbRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
                 // Add a simple re-route from: /get to: http://httpbin.org:80
@@ -33,7 +33,7 @@ public class RouteConfiguration {
                                 return chain.filter(exchange);
                             }
                         }))
-                        .uri("lb://zmt-service")) // forward to httpbin
+                        .uri("http://127.0.0.1:8125/account/enumList")) // forward to httpbin
                 .build();
     }
 

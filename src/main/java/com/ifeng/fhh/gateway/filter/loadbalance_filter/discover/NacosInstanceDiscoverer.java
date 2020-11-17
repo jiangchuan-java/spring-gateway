@@ -1,4 +1,4 @@
-package com.ifeng.fhh.gateway.discover.nacos;
+package com.ifeng.fhh.gateway.filter.loadbalance_filter.discover;
 
 import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingFactory;
@@ -7,7 +7,6 @@ import com.alibaba.nacos.api.naming.listener.Event;
 import com.alibaba.nacos.api.naming.listener.EventListener;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
-import com.ifeng.fhh.gateway.discover.AbstractInstanceDiscover;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;

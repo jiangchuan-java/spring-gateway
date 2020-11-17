@@ -1,4 +1,4 @@
-package com.ifeng.fhh.gateway.loadbalance;
+package com.ifeng.fhh.gateway.filter.loadbalance_filter.loadbalance;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.util.CollectionUtils;

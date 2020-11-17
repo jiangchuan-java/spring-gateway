@@ -1,4 +1,4 @@
-package com.ifeng.fhh.gateway.filter;
+package com.ifeng.fhh.gateway.filter.loadbalance_filter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,11 +32,11 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
  * @Date: 20-10-28
  */
 @Component
-public class GlobalBGatewayFilterFactory implements GlobalFilter, Ordered {
+public class GlobalLoadbalanceGatewayFilter implements GlobalFilter, Ordered {
 
 
     private static final Log log = LogFactory
-            .getLog(GlobalBGatewayFilterFactory.class);
+            .getLog(GlobalLoadbalanceGatewayFilter.class);
 
     @Override
     public int getOrder() {

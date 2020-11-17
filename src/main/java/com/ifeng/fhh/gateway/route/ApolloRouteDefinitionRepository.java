@@ -1,13 +1,10 @@
 package com.ifeng.fhh.gateway.route;
 
-import com.alibaba.fastjson.JSONObject;
 import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigService;
-import com.ifeng.fhh.gateway.filter.AuthorityGatewayFilterFactory;
 import com.ifeng.fhh.gateway.util.JackSonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
 import org.springframework.cloud.gateway.filter.FilterDefinition;
 import org.springframework.cloud.gateway.filter.factory.StripPrefixGatewayFilterFactory;
 import static org.springframework.cloud.gateway.filter.factory.StripPrefixGatewayFilterFactory.PARTS_KEY;

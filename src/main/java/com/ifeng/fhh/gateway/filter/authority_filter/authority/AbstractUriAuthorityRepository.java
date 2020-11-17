@@ -1,4 +1,4 @@
-package com.ifeng.fhh.gateway.authority;
+package com.ifeng.fhh.gateway.filter.authority_filter.authority;
 
 /**
  * @Des:

@@ -1,9 +1,8 @@
-package com.ifeng.fhh.gateway.filter;
+package com.ifeng.fhh.gateway.filter.authority_filter;
 
-import com.ifeng.fhh.gateway.authority.AuthorityValidator;
+import com.ifeng.fhh.gateway.filter.authority_filter.authority.AuthorityValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.cloud.gateway.route.Route;
 import org.springframework.http.HttpHeaders;

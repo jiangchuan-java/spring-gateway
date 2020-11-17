@@ -1,9 +1,8 @@
-package com.ifeng.fhh.gateway.authority.apollo;
+package com.ifeng.fhh.gateway.filter.authority_filter.authority;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.ctrip.framework.apollo.Config;
-import com.ifeng.fhh.gateway.authority.AbstractUriAuthorityRepository;
 import com.ifeng.fhh.gateway.util.JackSonUtils;
 import org.springframework.stereotype.Repository;
 import java.io.IOException;

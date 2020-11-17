@@ -1,13 +1,3 @@
-import com.alibaba.csp.sentinel.*;
-import com.alibaba.csp.sentinel.slots.block.BlockException;
-import com.alibaba.csp.sentinel.slots.block.RuleConstant;
-import com.alibaba.csp.sentinel.slots.block.degrade.DegradeRule;
-import com.alibaba.csp.sentinel.slots.block.degrade.DegradeRuleManager;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @Des:
@@ -18,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 public class SentinelTest {
 
 
-    private void initFlowQpsRule () {
+    /*private void initFlowQpsRule () {
         List<DegradeRule> rules = new ArrayList<>();
         DegradeRule rule = new DegradeRule();
         rule.setResource("helloWorld");
@@ -40,7 +30,7 @@ public class SentinelTest {
                 Entry entry = null;
                 try {
 
-                    /*entry = SphO.entry("helloWrold"); Sph0获取资源失败，返回false，内部捕获所有异常*/
+                    *//*entry = SphO.entry("helloWrold"); Sph0获取资源失败，返回false，内部捕获所有异常*//*
                     entry = SphU.entry("helloWorld"); //SphU获取资源失败，抛出BlockException异常
                     System.out.println("do work");
                     throw new RuntimeException("主动异常");
@@ -72,7 +62,7 @@ public class SentinelTest {
         }
 
         System.in.read();
-    }
+    }*/
 
 
 }

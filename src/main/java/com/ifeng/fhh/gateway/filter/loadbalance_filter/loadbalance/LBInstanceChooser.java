@@ -1,6 +1,6 @@
-package com.ifeng.fhh.gateway.loadbalance;
+package com.ifeng.fhh.gateway.filter.loadbalance_filter.loadbalance;
 
-import com.ifeng.fhh.gateway.discover.AbstractInstanceDiscover;
+import com.ifeng.fhh.gateway.filter.loadbalance_filter.discover.AbstractInstanceDiscover;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.DefaultResponse;
@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 import java.util.List;
 
-import static com.ifeng.fhh.gateway.filter.GlobalBGatewayFilterFactory.LBRequest;
+import static com.ifeng.fhh.gateway.filter.loadbalance_filter.GlobalLoadbalanceGatewayFilter.LBRequest;
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR;
 
 /**
@@ -37,7 +37,6 @@ public class LBInstanceChooser implements ReactorServiceInstanceLoadBalancer{
     //实例发现者
     @Autowired
     private AbstractInstanceDiscover instanceDiscover;
-
 
 
     @Override
