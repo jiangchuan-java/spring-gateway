@@ -1,27 +1,9 @@
 package com.ifeng.fhh.gateway.controller;
 
-import com.alibaba.csp.sentinel.Entry;
-import com.alibaba.csp.sentinel.SphO;
-import com.alibaba.csp.sentinel.SphU;
-import com.alibaba.csp.sentinel.Tracer;
-import com.alibaba.csp.sentinel.slots.block.BlockException;
-import com.alibaba.csp.sentinel.slots.block.RuleConstant;
-import com.alibaba.csp.sentinel.slots.block.degrade.DegradeRule;
-import com.alibaba.csp.sentinel.slots.block.degrade.DegradeRuleManager;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.atomic.LongAdder;
-import java.util.function.Supplier;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 
 /**
  * @Des:
@@ -29,12 +11,12 @@ import java.util.function.Supplier;
  * <p>
  * @Date: 20-11-16
  */
-@Controller
-@ResponseBody
+//@Controller
+//@ResponseBody
 public class Controller_Sentinel {
 
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Controller_Sentinel.class);
+    /*private static final Logger LOGGER = LoggerFactory.getLogger(Controller_Sentinel.class);
 
     private static void initFlowQpsRule () {
         List<DegradeRule> rules = new ArrayList<>();
@@ -80,5 +62,5 @@ public class Controller_Sentinel {
         }
         Mono<String> mono = Mono.fromFuture(completableFuture);
         return mono;
-    }
+    }*/
 }
