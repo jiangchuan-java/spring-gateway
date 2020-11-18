@@ -125,11 +125,11 @@ public class LoadbalanceGlobalGatewayFilter implements GlobalFilter, Ordered {
         }
     }
 
-    public ReactorLoadBalancer<ServiceInstance> getlBInstanceChooser() {
+    public ReactorLoadBalancer getlBInstanceChooser() {
         return lBInstanceChooser;
     }
 
-    public void setlBInstanceChooser(ReactorLoadBalancer<ServiceInstance> lBInstanceChooser) {
+    public void setlBInstanceChooser(ReactorLoadBalancer lBInstanceChooser) {
         this.lBInstanceChooser = lBInstanceChooser;
     }
 
