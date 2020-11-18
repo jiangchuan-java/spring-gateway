@@ -1,11 +1,15 @@
 package com.ifeng.fhh.gateway.filter.breaker_filter;
 
+import com.ifeng.fhh.gateway.filter.PropertiesUtil;
+import com.ifeng.fhh.gateway.filter.loadbalance_filter.LoadbalanceGlobalGatewayFilter;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.support.ServiceUnavailableException;
@@ -14,6 +18,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -27,12 +32,14 @@ import java.util.function.Function;
 public class BreakerGlobalGatewayFilter implements GlobalFilter, Ordered {
 
 
-    private static final Log LOGGER = LogFactory.getLog(BreakerGlobalGatewayFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoadbalanceGlobalGatewayFilter.class);
+
+    private ConcurrentHashMap<String/*serverId*/, CircuitBreaker/*熔断器*/> breakerMap = new ConcurrentHashMap<>();
 
     private int order;
 
 
-    CircuitBreakerConfig breakerConfig = CircuitBreakerConfig.custom()
+    private static final CircuitBreakerConfig breakerConfig = CircuitBreakerConfig.custom()
             .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED) /*固定大小，不做限流就简单点*/
             .slidingWindowSize(100) /*每100次计算一次,如果是时间类型的：单位就是秒*/
             .minimumNumberOfCalls(100) /*最少调用100次才能进行统计*/
@@ -41,13 +48,18 @@ public class BreakerGlobalGatewayFilter implements GlobalFilter, Ordered {
             .permittedNumberOfCallsInHalfOpenState(20) /*半打开状态下，尝试多少次请求*/
             .build();
 
-    CircuitBreakerRegistry registry = CircuitBreakerRegistry.of(breakerConfig);
-    CircuitBreaker circuitBreaker = registry.circuitBreaker("api-breaker");
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
         String requestPath = exchange.getRequest().getPath().value();
+
+        String serverId = exchange.getAttribute(PropertiesUtil.SERVER_ID);
+
+        CircuitBreaker circuitBreaker = breakerMap.get(serverId);
+        if(circuitBreaker == null){
+            circuitBreaker = threadSafeInitBreaker(serverId);
+        }
 
         long start = System.nanoTime();
         try {
@@ -57,18 +69,20 @@ public class BreakerGlobalGatewayFilter implements GlobalFilter, Ordered {
             return Mono.error(new ServiceUnavailableException());
         }
 
+        final CircuitBreaker finalBreaker = circuitBreaker; /*内部类，变量需要提前确定好*/
+
         return chain.filter(exchange).onErrorResume(new Function<Throwable, Mono<Void>>() {
             @Override
             public Mono<Void> apply(Throwable throwable) {
                 long durationInNanos = System.nanoTime() - start;
-                circuitBreaker.onError(durationInNanos, TimeUnit.NANOSECONDS, throwable);
+                finalBreaker.onError(durationInNanos, TimeUnit.NANOSECONDS, throwable);
                 return Mono.error(new ServiceUnavailableException());
             }
         }).doOnSuccess(new Consumer<Void>() {
             @Override
             public void accept(Void aVoid) {
                 long durationInNanos = System.nanoTime() - start;
-                circuitBreaker.onSuccess(durationInNanos, TimeUnit.NANOSECONDS);
+                finalBreaker.onSuccess(durationInNanos, TimeUnit.NANOSECONDS);
             }
         });
     }
@@ -80,5 +94,29 @@ public class BreakerGlobalGatewayFilter implements GlobalFilter, Ordered {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+
+    /**
+     * 线程安全的构建单例对象
+     * @param serverId
+     * @return
+     */
+    private CircuitBreaker threadSafeInitBreaker(String serverId){
+        CircuitBreaker breaker = breakerMap.get(serverId);
+        if(breaker == null){
+            synchronized (String.class) {
+                breaker = breakerMap.get(serverId);
+                if(breaker == null){
+                    CircuitBreakerRegistry registry = CircuitBreakerRegistry.of(breakerConfig);
+                    breaker= registry.circuitBreaker(serverId);
+                    breakerMap.put(serverId, breaker);
+                    LOGGER.info("init {} breaker", serverId);
+                }
+            }
+
+        }
+        return breaker;
+
     }
 }

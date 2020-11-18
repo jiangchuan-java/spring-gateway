@@ -1,6 +1,5 @@
 package com.ifeng.fhh.gateway.route;
 
-import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.route.RouteLocator;
@@ -19,18 +18,12 @@ import reactor.core.publisher.Mono;
 @Configuration
 public class RouteConfiguration {
 
-    //@Bean
+    @Bean
     public RouteLocator myLbRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
                 // Add a simple re-route from: /get to: http://httpbin.org:80
                 // Add a simple "Hello:World" HTTP Header
                 .route(r-> r.path("/zmt-service/**")
-                        .filters(f->f.stripPrefix(1).filters(new GatewayFilter() {
-                            @Override
-                            public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-                                return chain.filter(exchange);
-                            }
-                        }))
                         .uri("http://127.0.0.1:8126/account/enumList")) // forward to httpbin
                 .build();
     }
