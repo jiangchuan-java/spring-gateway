@@ -76,6 +76,7 @@ public class BreakerGlobalGatewayFilter implements GlobalFilter, Ordered {
             public Mono<Void> apply(Throwable throwable) {
                 long durationInNanos = System.nanoTime() - start;
                 finalBreaker.onError(durationInNanos, TimeUnit.NANOSECONDS, throwable);
+                LOGGER.info("{} filter error : {}",serverId, throwable);
                 return Mono.error(new ServiceUnavailableException());
             }
         }).doOnSuccess(new Consumer<Void>() {
