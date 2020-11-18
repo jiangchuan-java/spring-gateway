@@ -1,9 +1,8 @@
 package com.ifeng.fhh.gateway.filter.loadbalance_filter;
 
-import com.ifeng.fhh.gateway.filter.loadbalance_filter.loadbalance.LBInstanceChooser;
+import com.ifeng.fhh.gateway.filter.loadbalance_filter.lber_factory.AbstractLoadBalancerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
@@ -15,9 +14,12 @@ import org.springframework.cloud.gateway.support.DelegatingServiceInstance;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
 import org.springframework.core.Ordered;
+import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.net.URI;
 
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.*;
@@ -30,6 +32,7 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
  * <p>
  * @Date: 20-10-28
  */
+@Component
 public class LoadbalanceGlobalGatewayFilter implements GlobalFilter, Ordered {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoadbalanceGlobalGatewayFilter.class);
@@ -42,9 +45,16 @@ public class LoadbalanceGlobalGatewayFilter implements GlobalFilter, Ordered {
     }
 
 
+    @Resource(name = "randomLoadBalancerFactory")
+    private AbstractLoadBalancerFactory abstractLoadBalancerFactory;
 
-    private ReactorLoadBalancer lBInstanceChooser = new LBInstanceChooser();
 
+    private ReactorLoadBalancer<ServiceInstance> loadBalancer;
+
+    @PostConstruct
+    public void initLoadBalancer(){
+        this.loadBalancer = abstractLoadBalancerFactory.buildLoadBalancer();
+    }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -98,10 +108,10 @@ public class LoadbalanceGlobalGatewayFilter implements GlobalFilter, Ordered {
     private Mono<Response<ServiceInstance>> choose(ServerWebExchange exchange) {
 
         URI uri = exchange.getAttribute(GATEWAY_REQUEST_URL_ATTR);
-        if (lBInstanceChooser == null) {
+        if (loadBalancer == null) {
             throw new NotFoundException("No loadbalancer available for " + uri.getHost());
         }
-        return lBInstanceChooser.choose(createRequest(exchange));
+        return loadBalancer.choose(createRequest(exchange));
     }
 
     private Request createRequest(ServerWebExchange exchange) {
@@ -126,13 +136,6 @@ public class LoadbalanceGlobalGatewayFilter implements GlobalFilter, Ordered {
         }
     }
 
-    public ReactorLoadBalancer getlBInstanceChooser() {
-        return lBInstanceChooser;
-    }
-
-    public void setlBInstanceChooser(ReactorLoadBalancer lBInstanceChooser) {
-        this.lBInstanceChooser = lBInstanceChooser;
-    }
 
     public void setOrder(int order) {
         this.order = order;

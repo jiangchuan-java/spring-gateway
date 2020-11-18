@@ -39,21 +39,26 @@ public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
     private ConcurrentHashMap<String/*serverName*/, List<ServiceInstance>/*可用实例实例*/> serverInstanceCache = new ConcurrentHashMap<>();
 
 
-    public NacosInstanceDiscoverer(@Value("${nacos.serverAddr}")String serverAddr, @Value("${nacos.namespace.gateway}")String namespace) throws Exception{
-        this.serverAddr = serverAddr;
-        this.namespace = namespace;
+    public NacosInstanceDiscoverer(@Value("${nacos.serverAddr}") String serverAddr, @Value("${nacos.namespace.gateway}") String namespace) {
+        try {
+            this.serverAddr = serverAddr;
+            this.namespace = namespace;
 
-        Properties properties = new Properties();
-        properties.setProperty("serverAddr", serverAddr);
-        properties.setProperty("namespace", namespace);
-        properties.setProperty("username", "zmt");
-        properties.setProperty("password", "zmtpwd");
-        namingService = NamingFactory.createNamingService(properties);
+            Properties properties = new Properties();
+            properties.setProperty("serverAddr", serverAddr);
+            properties.setProperty("namespace", namespace);
+            properties.setProperty("username", "zmt");
+            properties.setProperty("password", "zmtpwd");
+            namingService = NamingFactory.createNamingService(properties);
+        } catch (NacosException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
     /**
      * 初始化实例缓存
+     *
      * @param host
      */
     public void initServerInstanceCache(String host) {
@@ -69,7 +74,6 @@ public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
             e.printStackTrace();
         }
     }
-
 
 
     /**
@@ -88,11 +92,10 @@ public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
     }
 
 
-
     private List<ServiceInstance> transferTo(List<Instance> instanceList) {
         Objects.requireNonNull(instanceList);
         List<ServiceInstance> serviceInstanceList = new ArrayList<>();
-        for(Instance instance : instanceList){
+        for (Instance instance : instanceList) {
             serviceInstanceList.add(transferTo(instance));
         }
         return serviceInstanceList;
@@ -111,12 +114,13 @@ public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
 
     /**
      * 返回当前的实例列表
+     *
      * @return
      */
     @Override
     public List<ServiceInstance> getCurrentServiceInstances(String host) {
         List<ServiceInstance> serverInstanceList = serverInstanceCache.get(host);
-        if(Objects.isNull(serverInstanceList)){
+        if (Objects.isNull(serverInstanceList)) {
             try {
                 List<Instance> nacosInstanceList = namingService.selectInstances(host, true);
                 namingService.subscribe(host, new NacosEventListener());
@@ -129,7 +133,6 @@ public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
         }
         return serverInstanceList;
     }
-
 
 
     public String getServerAddr() {

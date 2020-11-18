@@ -1,7 +1,6 @@
-package com.ifeng.fhh.gateway.filter.loadbalance_filter.loadbalance;
+package com.ifeng.fhh.gateway.filter.loadbalance_filter.lb_algorithm;
 
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -10,10 +9,9 @@ import java.util.concurrent.ThreadLocalRandom;
  * @Des:
  * @Author: jiangchuan
  * <p>
- * @Date: 20-10-29
+ * @Date: 20-11-18
  */
-@Component
-public class RandomLoadBalancer extends AbstractLoadBalancer {
+public class RandomLBAlgorithm extends AbstractLBAlgorithm {
 
     public static final String NAME = "random";
 

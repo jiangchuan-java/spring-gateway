@@ -1,4 +1,4 @@
-package com.ifeng.fhh.gateway.filter.loadbalance_filter.loadbalance;
+package com.ifeng.fhh.gateway.filter.loadbalance_filter.lb_algorithm;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.util.CollectionUtils;
@@ -12,7 +12,7 @@ import java.util.Objects;
  * <p>
  * @Date: 20-10-29
  */
-public abstract class AbstractLoadBalancer {
+public abstract class AbstractLBAlgorithm {
 
 
     public ServiceInstance select(List<ServiceInstance> instances) {
