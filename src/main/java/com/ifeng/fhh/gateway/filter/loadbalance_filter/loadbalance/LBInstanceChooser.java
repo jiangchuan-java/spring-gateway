@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 import java.util.List;
 
-import static com.ifeng.fhh.gateway.filter.loadbalance_filter.GlobalLoadbalanceGatewayFilter.LBRequest;
+import static com.ifeng.fhh.gateway.filter.loadbalance_filter.LoadbalanceGlobalGatewayFilter.LBRequest;
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR;
 
 /**

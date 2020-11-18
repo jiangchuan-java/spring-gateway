@@ -32,11 +32,12 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
  * @Date: 20-10-28
  */
 @Component
-public class GlobalLoadbalanceGatewayFilter implements GlobalFilter, Ordered {
-
+public class LoadbalanceGlobalGatewayFilter implements GlobalFilter, Ordered {
 
     private static final Log log = LogFactory
-            .getLog(GlobalLoadbalanceGatewayFilter.class);
+            .getLog(LoadbalanceGlobalGatewayFilter.class);
+
+
 
     @Override
     public int getOrder() {
@@ -90,7 +91,6 @@ public class GlobalLoadbalanceGatewayFilter implements GlobalFilter, Ordered {
                 log.trace("LoadBalancerClientFilter url chosen: " + requestUrl);
             }
             exchange.getAttributes().put(GATEWAY_REQUEST_URL_ATTR, requestUrl);
-            long end = System.currentTimeMillis();
         }).then(chain.filter(exchange));
 
     }

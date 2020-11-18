@@ -19,8 +19,7 @@ import reactor.core.publisher.Mono;
 @Configuration
 public class RouteConfiguration {
 
-
-    //@Bean
+    @Bean
     public RouteLocator myLbRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
                 // Add a simple re-route from: /get to: http://httpbin.org:80
@@ -29,11 +28,10 @@ public class RouteConfiguration {
                         .filters(f->f.stripPrefix(1).filters(new GatewayFilter() {
                             @Override
                             public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-                                System.out.println(1);
                                 return chain.filter(exchange);
                             }
                         }))
-                        .uri("http://127.0.0.1:8125/account/enumList")) // forward to httpbin
+                        .uri("http://127.0.0.1:8126/account/enumList")) // forward to httpbin
                 .build();
     }
 

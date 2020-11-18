@@ -59,7 +59,7 @@ public class ResilienceTest {
 
                 TimeUnit.SECONDS.sleep(1);
             }catch (Exception e){
-
+                e.printStackTrace();
             }
 
         }
@@ -101,7 +101,7 @@ public class ResilienceTest {
                 System.out.println(i + " " + breaker1.getState());
                 runnable.run();
             }catch (Exception e){
-
+                e.printStackTrace();
             }
 
         }
