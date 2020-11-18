@@ -33,6 +33,7 @@ public class FilterOrderUpdater implements BeanPostProcessor {
                 Field orderField = beanClass.getDeclaredField("order");
                 orderField.setAccessible(true);
                 orderField.set(bean, order);
+                LOGGER.info("update filter bean : {}, order: {}", beanClass.getSimpleName(), order);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -48,7 +49,6 @@ public class FilterOrderUpdater implements BeanPostProcessor {
             Class clazz = filter.getClazz();
             int order = filter.getOrder();
             filterClassOrderInfo.put(clazz, order);
-            LOGGER.info("register filter bean : {}, order: {}", clazz.getSimpleName(), order);
         }
     }
 }
