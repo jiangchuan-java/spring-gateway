@@ -61,13 +61,6 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
     private static final List<PredicateDefinition> defalutPD = new ArrayList<>();
     private static final List<FilterDefinition> defaultFD = new ArrayList<>();
 
-    static {
-        //去掉第一个请求uri
-        FilterDefinition stripPrefix = new FilterDefinition();
-        stripPrefix.setName(normalizeFilterFactoryName(StripPrefixGatewayFilterFactory.class));
-        stripPrefix.addArg(PARTS_KEY, "1");
-        defaultFD.add(stripPrefix);
-    }
 
     public ApolloRouteDefinitionRepository(){
         apolloConfig = ConfigService.getConfig(ROUTE_DEFINITION_NAMESPACE);
