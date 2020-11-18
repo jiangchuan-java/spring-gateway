@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 
 /**
- * @Des: 随机算法 + nacos实例发现器组装的负载均衡器
+ * @Des: 随机算法 + nacos = 负载均衡器
  * @Author: jiangchuan
  * <p>
  * @Date: 20-11-18

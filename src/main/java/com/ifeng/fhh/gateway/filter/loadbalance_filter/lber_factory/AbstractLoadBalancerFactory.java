@@ -21,6 +21,7 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
 
 /**
  * @Des: 抽象工厂，生产负载均衡选择器及其必要依赖
+ *  很多类被注入进来了，但使用哪些，就可以由工厂进行组成装，进而提供实例
  * @Author: jiangchuan
  * <p>
  * @Date: 20-11-18
