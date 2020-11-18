@@ -14,6 +14,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.support.ServiceUnavailableException;
 import org.springframework.core.Ordered;
+import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -29,6 +30,7 @@ import java.util.function.Function;
  * <p>
  * @Date: 20-10-28
  */
+@Component
 public class BreakerGlobalGatewayFilter implements GlobalFilter, Ordered {
 
 

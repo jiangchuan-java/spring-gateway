@@ -6,12 +6,12 @@ import com.ifeng.fhh.gateway.filter.monitor_filter.MonitorGlobalGatewayFilter;
 import com.ifeng.fhh.gateway.filter.stripPrefix_filter.ServerIdExtractGlobalGatewayFilter;
 
 /**
- * @Des: filter在这里进行配置，并由filterRegister负责注入进spring context中
+ * @Des: filter的 order 定义，在这里可以调整filter的整体顺序
  * @Author: jiangchuan
  * <p>
  * @Date: 20-11-18
  */
-public enum FilterConfiguration {
+public enum FilterOrderDefine {
 
     //提取serverId的filter
     STRIPPREFIX_GLOBAL_GATEWAYFILTER(ServerIdExtractGlobalGatewayFilter.class, 1),
@@ -26,7 +26,7 @@ public enum FilterConfiguration {
 
     private int order;
 
-    FilterConfiguration(Class clazz, int order) {
+    FilterOrderDefine(Class clazz, int order) {
         this.clazz = clazz;
         this.order = order;
     }
