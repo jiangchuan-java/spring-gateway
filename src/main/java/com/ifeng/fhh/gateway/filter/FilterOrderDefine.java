@@ -7,6 +7,7 @@ import com.ifeng.fhh.gateway.filter.stripPrefix_filter.ServerIdExtractGlobalGate
 
 /**
  * @Des: filter的 order 定义，在这里可以调整filter的整体顺序
+ *    注意： filter中必须含有 int order 属性才可以在这里调整顺序
  * @Author: jiangchuan
  * <p>
  * @Date: 20-11-18

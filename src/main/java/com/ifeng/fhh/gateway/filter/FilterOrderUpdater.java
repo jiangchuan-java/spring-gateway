@@ -51,4 +51,5 @@ public class FilterOrderUpdater implements BeanPostProcessor {
             filterClassOrderInfo.put(clazz, order);
         }
     }
+
 }
