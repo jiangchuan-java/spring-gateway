@@ -7,6 +7,8 @@ import com.alibaba.nacos.api.naming.listener.Event;
 import com.alibaba.nacos.api.naming.listener.EventListener;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
@@ -23,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NacosInstanceDiscoverer.class);
 
     private NamingService namingService;
 
@@ -45,6 +49,25 @@ public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
         properties.setProperty("username", "zmt");
         properties.setProperty("password", "zmtpwd");
         namingService = NamingFactory.createNamingService(properties);
+    }
+
+
+    /**
+     * 初始化实例缓存
+     * @param host
+     */
+    public void initServerInstanceCache(String host) {
+        try {
+            List<ServiceInstance> serverInstanceList = new ArrayList<>();
+            List<Instance> nacosInstanceList = namingService.selectInstances(host, true);
+            namingService.subscribe(host, new NacosEventListener());
+            serverInstanceList = transferTo(nacosInstanceList);
+            serverInstanceCache.put(host, serverInstanceList);
+
+            LOGGER.info("init host: {} server instatnces", host);
+        } catch (NacosException e) {
+            e.printStackTrace();
+        }
     }
 
 

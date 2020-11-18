@@ -1,4 +1,4 @@
-package com.ifeng.fhh.gateway.filter;
+package com.ifeng.fhh.gateway.filter.breaker_filter;
 
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
@@ -6,15 +6,12 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.reactivestreams.Subscription;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.support.ServiceUnavailableException;
 import org.springframework.core.Ordered;
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.SignalType;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -27,17 +24,21 @@ import java.util.function.Function;
  * <p>
  * @Date: 20-10-28
  */
-@Component
 public class BreakerGlobalGatewayFilter implements GlobalFilter, Ordered {
 
 
     private static final Log LOGGER = LogFactory.getLog(BreakerGlobalGatewayFilter.class);
 
+    private int order;
+
+
     CircuitBreakerConfig breakerConfig = CircuitBreakerConfig.custom()
-            .ringBufferSizeInClosedState(4) // 断路器关闭状态下队列的大小，队列满了之后，触发失败比例的计算
-            .failureRateThreshold(50) //失败比例
-            .waitDurationInOpenState(Duration.ofSeconds(5)) //断路器开启后保持多久
-            .ringBufferSizeInHalfOpenState(2) //在试探时的队列大小，满了计算失败比例
+            .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED) /*固定大小，不做限流就简单点*/
+            .slidingWindowSize(100) /*每100次计算一次,如果是时间类型的：单位就是秒*/
+            .minimumNumberOfCalls(100) /*最少调用100次才能进行统计*/
+            .failureRateThreshold(80) /*80%失败率*/
+            .waitDurationInOpenState(Duration.ofSeconds(3)) /*维持熔断状态3秒*/
+            .permittedNumberOfCallsInHalfOpenState(20) /*半打开状态下，尝试多少次请求*/
             .build();
 
     CircuitBreakerRegistry registry = CircuitBreakerRegistry.of(breakerConfig);
@@ -74,6 +75,10 @@ public class BreakerGlobalGatewayFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return 2;
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 }

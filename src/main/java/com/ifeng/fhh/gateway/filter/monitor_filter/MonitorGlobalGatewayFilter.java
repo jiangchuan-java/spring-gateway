@@ -1,4 +1,4 @@
-package com.ifeng.fhh.gateway.filter;
+package com.ifeng.fhh.gateway.filter.monitor_filter;
 
 import io.prometheus.client.Histogram;
 import io.prometheus.client.hotspot.DefaultExports;
@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SignalType;
@@ -20,12 +19,12 @@ import java.util.function.Consumer;
  * <p>
  * @Date: 20-10-28
  */
-@Component
 public class MonitorGlobalGatewayFilter implements GlobalFilter, Ordered {
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MonitorGlobalGatewayFilter.class);
 
+    private int order;
 
     private static final Histogram requestLatency = Histogram.build()
             .name("FHH_GATEWAY_REQUEST").labelNames("requestPath").help("Request latency in seconds.").register();
@@ -53,6 +52,10 @@ public class MonitorGlobalGatewayFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return 1;
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 }

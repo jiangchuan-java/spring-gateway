@@ -2,9 +2,11 @@ package com.ifeng.fhh.gateway.route;
 
 import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigService;
+import com.ifeng.fhh.gateway.filter.loadbalance_filter.discover.NacosInstanceDiscoverer;
 import com.ifeng.fhh.gateway.util.JackSonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.FilterDefinition;
 import org.springframework.cloud.gateway.filter.factory.StripPrefixGatewayFilterFactory;
 import static org.springframework.cloud.gateway.filter.factory.StripPrefixGatewayFilterFactory.PARTS_KEY;
@@ -41,6 +43,9 @@ import static org.springframework.cloud.gateway.support.NameUtils.normalizeRoute
 public class ApolloRouteDefinitionRepository implements RouteDefinitionRepository, ApplicationEventPublisherAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApolloRouteDefinitionRepository.class);
+
+    @Autowired
+    private NacosInstanceDiscoverer nacosInstanceDiscoverer;
 
     private Config apolloConfig;
 
@@ -87,6 +92,7 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
             RouteDefinition routeDefinition = buildRouteDefinition(routeDefinitionValue);
             if(Objects.nonNull(routeDefinition)){
                 routeDefinitionCache.put(serverName, routeDefinition);
+                nacosInstanceDiscoverer.initServerInstanceCache(routeDefinition.getUri().getHost());
             }
         }
 

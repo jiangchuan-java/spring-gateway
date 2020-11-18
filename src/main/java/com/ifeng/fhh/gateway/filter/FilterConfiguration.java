@@ -1,14 +1,16 @@
 package com.ifeng.fhh.gateway.filter;
 
+import com.ifeng.fhh.gateway.filter.breaker_filter.BreakerGlobalGatewayFilter;
 import com.ifeng.fhh.gateway.filter.loadbalance_filter.LoadbalanceGlobalGatewayFilter;
+import com.ifeng.fhh.gateway.filter.monitor_filter.MonitorGlobalGatewayFilter;
 
 /**
- * @Des:
+ * @Des: filter在这里进行配置，并由filterRegister负责注入进spring context中
  * @Author: jiangchuan
  * <p>
  * @Date: 20-11-18
  */
-public enum FilterManager {
+public enum FilterConfiguration {
 
     //prometheus指标采集filter
     MONITOR_GLOBAL_GATEWAYFILTER(MonitorGlobalGatewayFilter.class, 1),
@@ -21,7 +23,7 @@ public enum FilterManager {
 
     private int order;
 
-    FilterManager(Class clazz, int order) {
+    FilterConfiguration(Class clazz, int order) {
         this.clazz = clazz;
         this.order = order;
     }
