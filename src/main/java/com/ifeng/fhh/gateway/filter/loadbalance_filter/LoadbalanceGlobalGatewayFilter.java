@@ -42,7 +42,7 @@ public class LoadbalanceGlobalGatewayFilter implements GlobalFilter, Ordered {
 
 
     @Autowired
-    private ReactorLoadBalancer<ServiceInstance> lBInstanceChooser;
+    private ReactorLoadBalancer lBInstanceChooser;
 
 
     @Override
