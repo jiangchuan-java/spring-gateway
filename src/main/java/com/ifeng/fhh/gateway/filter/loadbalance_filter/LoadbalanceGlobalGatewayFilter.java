@@ -1,5 +1,6 @@
 package com.ifeng.fhh.gateway.filter.loadbalance_filter;
 
+import com.ifeng.fhh.gateway.filter.loadbalance_filter.loadbalance.LBInstanceChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +42,8 @@ public class LoadbalanceGlobalGatewayFilter implements GlobalFilter, Ordered {
     }
 
 
-    @Autowired
-    private ReactorLoadBalancer lBInstanceChooser;
+
+    private ReactorLoadBalancer lBInstanceChooser = new LBInstanceChooser();
 
 
     @Override

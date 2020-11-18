@@ -8,7 +8,6 @@ import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
 import org.springframework.cloud.gateway.route.Route;
 import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -26,7 +25,6 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
  * <p>
  * @Date: 20-10-28
  */
-@Component
 public class LBInstanceChooser implements ReactorServiceInstanceLoadBalancer{
 
 
