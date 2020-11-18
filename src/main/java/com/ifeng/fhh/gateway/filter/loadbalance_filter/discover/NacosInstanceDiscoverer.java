@@ -64,7 +64,7 @@ public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
             serverInstanceList = transferTo(nacosInstanceList);
             serverInstanceCache.put(host, serverInstanceList);
 
-            LOGGER.info("init host: {} server instatnces", host);
+            LOGGER.info("init host: {} server instatnces : {}", host, serverInstanceList.size());
         } catch (NacosException e) {
             e.printStackTrace();
         }
