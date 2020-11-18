@@ -54,6 +54,7 @@ public class LoadbalanceGlobalGatewayFilter implements GlobalFilter, Ordered {
     @PostConstruct
     public void initLoadBalancer(){
         this.loadBalancer = abstractLoadBalancerFactory.buildLoadBalancer(); /*从工厂获取实例*/
+        LOGGER.info("init loadBalancer");
     }
 
     @Override
