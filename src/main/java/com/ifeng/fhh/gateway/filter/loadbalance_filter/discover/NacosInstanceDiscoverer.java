@@ -85,7 +85,8 @@ public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
             if (event instanceof NamingEvent) {
                 List<Instance> nacosInstanceList = ((NamingEvent) event).getInstances();
                 List<ServiceInstance> serviceInstanceList = transferTo(nacosInstanceList);
-                String serviceName = ((NamingEvent) event).getServiceName();
+                //DEFAULT_GROUP@@fhh-api
+                String serviceName = ((NamingEvent) event).getServiceName().split("@@")[1];
                 serverInstanceCache.put(serviceName, serviceInstanceList);
                 LOGGER.info(" {} nacos update : {}", serviceName, serviceInstanceList.size());
             }
