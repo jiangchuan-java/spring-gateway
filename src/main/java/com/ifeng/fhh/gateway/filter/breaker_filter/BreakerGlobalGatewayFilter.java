@@ -6,8 +6,6 @@ import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -46,7 +44,7 @@ public class BreakerGlobalGatewayFilter implements GlobalFilter, Ordered {
             .slidingWindowSize(100) /*每100次计算一次,如果是时间类型的：单位就是秒*/
             .minimumNumberOfCalls(100) /*最少调用100次才能进行统计*/
             .failureRateThreshold(80) /*80%失败率*/
-            .waitDurationInOpenState(Duration.ofSeconds(3)) /*维持熔断状态3秒*/
+            .waitDurationInOpenState(Duration.ofSeconds(5)) /*维持熔断状态5秒*/
             .permittedNumberOfCallsInHalfOpenState(20) /*半打开状态下，尝试多少次请求*/
             .build();
 

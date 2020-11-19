@@ -23,7 +23,7 @@ public class WebClientTest {
         HttpClientTemplate template = new ApacheAsyncHttpClient();
 
 
-            Mono<String> mono = template.get("http://local-fhh-gateway.ifengidc.com/zmt-service/account/enumList");
+            Mono<String> mono = template.get("http://local.fhh-gateway.ifeng.com/zmt-service/account/enumList");
 
             mono.subscribe(resp -> {
                 System.out.println(resp);
