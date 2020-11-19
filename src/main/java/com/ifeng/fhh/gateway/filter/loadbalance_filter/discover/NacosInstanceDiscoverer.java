@@ -65,7 +65,7 @@ public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
         try {
             List<ServiceInstance> serverInstanceList = new ArrayList<>();
             List<Instance> nacosInstanceList = namingService.selectInstances(host, true);
-            namingService.subscribe(host, new NacosEventListener());
+            namingService.subscribe(host, new NacosEventListener(host));
             serverInstanceList = transferTo(nacosInstanceList);
             serverInstanceCache.put(host, serverInstanceList);
 
@@ -80,13 +80,16 @@ public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
      * nacos 的配置变更监听
      */
     private class NacosEventListener implements EventListener {
+        private String serviceName;
+        public NacosEventListener(String serviceName) {
+            this.serviceName = serviceName;
+        }
         @Override
         public void onEvent(Event event) {
             if (event instanceof NamingEvent) {
                 List<Instance> nacosInstanceList = ((NamingEvent) event).getInstances();
                 List<ServiceInstance> serviceInstanceList = transferTo(nacosInstanceList);
                 //DEFAULT_GROUP@@fhh-api
-                String serviceName = ((NamingEvent) event).getServiceName().split("@@")[1];
                 serverInstanceCache.put(serviceName, serviceInstanceList);
                 LOGGER.info(" {} nacos update : {}", serviceName, serviceInstanceList.size());
             }
@@ -125,7 +128,7 @@ public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
         if (Objects.isNull(serverInstanceList)) {
             try {
                 List<Instance> nacosInstanceList = namingService.selectInstances(host, true);
-                namingService.subscribe(host, new NacosEventListener());
+                namingService.subscribe(host, new NacosEventListener(host));
                 serverInstanceList = transferTo(nacosInstanceList);
                 serverInstanceCache.put(host, serverInstanceList);
             } catch (NacosException e) {
