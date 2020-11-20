@@ -1,12 +1,15 @@
 package com.ifeng.fhh.gateway.route;
 
 import com.ctrip.framework.apollo.Config;
+import com.ctrip.framework.apollo.ConfigChangeListener;
 import com.ctrip.framework.apollo.ConfigService;
+import com.ctrip.framework.apollo.model.ConfigChangeEvent;
 import com.ifeng.fhh.gateway.filter.loadbalance_filter.discover.NacosInstanceDiscoverer;
 import com.ifeng.fhh.gateway.util.JackSonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
 import org.springframework.cloud.gateway.filter.FilterDefinition;
 import org.springframework.cloud.gateway.filter.factory.StripPrefixGatewayFilterFactory;
 import static org.springframework.cloud.gateway.filter.factory.StripPrefixGatewayFilterFactory.PARTS_KEY;
@@ -50,9 +53,7 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
 
     private Config apolloConfig;
 
-    private ConcurrentHashMap<String/*servername*/, RouteDefinition/*路由定义*/> routeDefinitionCache = new ConcurrentHashMap<>();
-
-    private ConcurrentHashMap<String/*serviveId*/, Route/*路由定义*/> routeCache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String/*serviceId*/, RouteDefinition/*路由定义*/> routeDefinitionCache = new ConcurrentHashMap<>();
 
     private static final String ROUTE_DEFINITION_NAMESPACE = "route-definition";
 
@@ -79,37 +80,54 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
      *
      */
     @PostConstruct
-    private void initCache(){
-        Set<String> serverNameSet = apolloConfig.getPropertyNames();
-        for(String serverName : serverNameSet){
-            String routeDefinitionValue = apolloConfig.getProperty(serverName, null);
-            RouteDefinition routeDefinition = buildRouteDefinition(routeDefinitionValue);
+    private void initRepository() throws Exception{
+        Set<String> serviceIdSet = apolloConfig.getPropertyNames();
+        for(String serviceId : serviceIdSet){
+            String routeDefinitionValue = apolloConfig.getProperty(serviceId, null);
+            ApolloRouteModel routeModel = JackSonUtils.json2Bean(routeDefinitionValue, ApolloRouteModel.class);
+            RouteDefinition routeDefinition = buildRouteDefinition(routeModel);
             if(Objects.nonNull(routeDefinition)){
-                routeDefinitionCache.put(serverName, routeDefinition);
-                nacosInstanceDiscoverer.initServerInstanceCache(routeDefinition.getUri().getHost());
+                routeDefinitionCache.put(serviceId, routeDefinition);
+                noticeNacos(routeDefinition.getUri().getHost());
             }
         }
-
+        apolloConfig.addChangeListener(new RouteDefinitonChangeListener());
+        noticeCachingRouteLocator();
     }
 
+    private void updateRepository(ApolloRouteModel routeModel){
+        String serviceId = routeModel.getServiceId();
+        RouteDefinition routeDefinition = buildRouteDefinition(routeModel);
+        routeDefinitionCache.put(serviceId, routeDefinition);
+        noticeNacos(routeDefinition.getUri().getHost());
+        noticeCachingRouteLocator();
+    }
 
-    private RouteDefinition buildRouteDefinition(String routeDefinitionValue) {
+    //通知nacos监听新实例
+    private void noticeNacos(String host) {
+        nacosInstanceDiscoverer.initServerInstanceCache(host);
+    }
+
+    //通知路由缓存刷新
+    private void noticeCachingRouteLocator() {
+        applicationEventPublisher.publishEvent(new RefreshRoutesEvent(this));
+    }
+
+    private RouteDefinition buildRouteDefinition(ApolloRouteModel routeModel) {
         try {
-            ApolloRouteModel model = JackSonUtils.json2Bean(routeDefinitionValue, ApolloRouteModel.class);
-
             ArrayList<PredicateDefinition> predicateDef = new ArrayList<>();
 
             PredicateDefinition predicate = new PredicateDefinition();
             predicate.setName(normalizeRoutePredicateName(PathRoutePredicateFactory.class));
-            predicate.addArg(PATTERN_KEY, "/"+model.getServiceId()+"/**");
+            predicate.addArg(PATTERN_KEY, "/"+routeModel.getServiceId()+"/**");
             predicateDef.add(predicate);
 
 
             RouteDefinition routeDefinition = new RouteDefinition();
-            routeDefinition.setUri(URI.create(model.getUri()));
+            routeDefinition.setUri(URI.create(routeModel.getUri()));
             routeDefinition.setPredicates(predicateDef);
             routeDefinition.setFilters(defaultFD);
-            routeDefinition.setId(model.getServiceId());
+            routeDefinition.setId(routeModel.getServiceId());
 
             LOGGER.info("build new route : {}", routeDefinition.toString());
 
@@ -118,6 +136,28 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    private class RouteDefinitonChangeListener implements ConfigChangeListener {
+
+        @Override
+        public void onChange(ConfigChangeEvent changeEvent) {
+            try {
+                for (String serverName : changeEvent.changedKeys()) {
+                    String newValue = changeEvent.getChange(serverName).getNewValue();
+                    String oldValue = changeEvent.getChange(serverName).getOldValue();
+
+                    LOGGER.info("RouteDefinitonChangeListener, serverName : {} changed, oldValue: {}, newValue: {}"
+                            , serverName, oldValue, newValue);
+                    ApolloRouteModel newConfig = JackSonUtils.json2Bean(newValue, ApolloRouteModel.class);
+
+                    updateRepository(newConfig);
+
+                }
+            } catch (Exception e) {
+                LOGGER.error("RouteDefinitonChangeListener failed exception: {}", e);
+            }
         }
     }
 
@@ -198,6 +238,8 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
             this.uri = uri;
         }
     }
+
+
 
 
 
