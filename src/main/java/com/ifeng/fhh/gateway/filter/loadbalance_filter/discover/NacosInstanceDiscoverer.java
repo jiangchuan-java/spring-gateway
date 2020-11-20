@@ -65,6 +65,9 @@ public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
         try {
             List<ServiceInstance> serverInstanceList = new ArrayList<>();
             List<Instance> nacosInstanceList = namingService.selectInstances(host, true);
+            if(serverInstanceCache.containsKey(host)){
+                return;
+            }
             namingService.subscribe(host, new NacosEventListener(host));
             serverInstanceList = transferTo(nacosInstanceList);
             serverInstanceCache.put(host, serverInstanceList);
