@@ -120,4 +120,13 @@ public class BreakerGlobalGatewayFilter implements GlobalFilter, Ordered {
         return breaker;
 
     }
+
+    /**
+     * 更新某个业务的breaker
+     * @param serverId
+     * @param breaker
+     */
+    public void updateBreakerMap(String serverId, CircuitBreaker breaker){
+        breakerMap.put(serverId, breaker);
+    }
 }

@@ -1,4 +1,4 @@
-package com.ifeng.fhh.gateway.beans;
+package com.ifeng.fhh.gateway.spring.bean;
 
 import com.ifeng.fhh.gateway.util.httpclient.ApacheAsyncHttpClient;
 import com.ifeng.fhh.gateway.util.httpclient.HttpClientTemplate;
@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
  * @Date: 20-9-15
  */
 @Configuration
-public class HttpAsyncClientConfiguration {
+public class HttpAsyncClientBean {
 
     @Bean
     public HttpClientTemplate buildTemplate() throws Exception{

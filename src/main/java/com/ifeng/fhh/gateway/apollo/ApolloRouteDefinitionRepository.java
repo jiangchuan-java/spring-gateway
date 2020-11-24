@@ -1,4 +1,4 @@
-package com.ifeng.fhh.gateway.route;
+package com.ifeng.fhh.gateway.apollo;
 
 import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigChangeListener;
@@ -11,12 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
 import org.springframework.cloud.gateway.filter.FilterDefinition;
-import org.springframework.cloud.gateway.filter.factory.StripPrefixGatewayFilterFactory;
-import static org.springframework.cloud.gateway.filter.factory.StripPrefixGatewayFilterFactory.PARTS_KEY;
 import org.springframework.cloud.gateway.handler.predicate.PathRoutePredicateFactory;
 import static org.springframework.cloud.gateway.handler.predicate.PathRoutePredicateFactory.PATTERN_KEY;
 import org.springframework.cloud.gateway.handler.predicate.PredicateDefinition;
-import org.springframework.cloud.gateway.route.Route;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -34,7 +31,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-import static org.springframework.cloud.gateway.support.NameUtils.normalizeFilterFactoryName;
 import static org.springframework.cloud.gateway.support.NameUtils.normalizeRoutePredicateName;
 
 /**
@@ -43,7 +39,7 @@ import static org.springframework.cloud.gateway.support.NameUtils.normalizeRoute
  * <p>
  * @Date: 20-11-3
  */
-@Repository
+//@Repository
 public class ApolloRouteDefinitionRepository implements RouteDefinitionRepository, ApplicationEventPublisherAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApolloRouteDefinitionRepository.class);

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * @Des:
+ * @Des: 权重+随机
  * @Author: jiangchuan
  * <p>
  * @Date: 20-11-18

@@ -16,6 +16,14 @@
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport-native-epoll</artifactId>
+            <version>4.1.52.Final</version>
+            <classifier>linux-x86_64</classifier>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-gateway -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
