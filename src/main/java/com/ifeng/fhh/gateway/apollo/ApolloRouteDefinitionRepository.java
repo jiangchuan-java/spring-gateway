@@ -21,6 +21,8 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import static org.springframework.cloud.gateway.support.RouteMetadataUtils.CONNECT_TIMEOUT_ATTR;
+import static org.springframework.cloud.gateway.support.RouteMetadataUtils.RESPONSE_TIMEOUT_ATTR;
 
 import javax.annotation.PostConstruct;
 import java.net.URI;
@@ -118,12 +120,21 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
             predicate.addArg(PATTERN_KEY, "/"+routeModel.getServiceId()+"/**");
             predicateDef.add(predicate);
 
+            Long connectTimeout = routeModel.getConnectTimeout();
+            Long responseTimeout = routeModel.getResponseTimeout();
+
 
             RouteDefinition routeDefinition = new RouteDefinition();
             routeDefinition.setUri(URI.create(routeModel.getUri()));
             routeDefinition.setPredicates(predicateDef);
             routeDefinition.setFilters(defaultFD);
             routeDefinition.setId(routeModel.getServiceId());
+            if(connectTimeout != null){
+                routeDefinition.getMetadata().put(CONNECT_TIMEOUT_ATTR, connectTimeout);
+            }
+            if(responseTimeout != null){
+                routeDefinition.getMetadata().put(RESPONSE_TIMEOUT_ATTR, responseTimeout);
+            }
 
             LOGGER.info("build new route : {}", routeDefinition.toString());
 
@@ -185,38 +196,10 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
 
         private String uri;
 
-        private List<AuthorityConfig> authorityConfigList;
+        private Long connectTimeout;
 
-        private static class AuthorityConfig {
+        private Long responseTimeout;
 
-            private String path;
-
-            private String roleId;
-
-            public String getPath() {
-                return path;
-            }
-
-            public void setPath(String path) {
-                this.path = path;
-            }
-
-            public String getRoleId() {
-                return roleId;
-            }
-
-            public void setRoleId(String roleId) {
-                this.roleId = roleId;
-            }
-        }
-
-        public List<AuthorityConfig> getAuthorityConfigList() {
-            return authorityConfigList;
-        }
-
-        public void setAuthorityConfigList(List<AuthorityConfig> authorityConfigList) {
-            this.authorityConfigList = authorityConfigList;
-        }
 
         public String getServiceId() {
             return serviceId;
@@ -232,6 +215,22 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
 
         public void setUri(String uri) {
             this.uri = uri;
+        }
+
+        public Long getConnectTimeout() {
+            return connectTimeout;
+        }
+
+        public void setConnectTimeout(Long connectTimeout) {
+            this.connectTimeout = connectTimeout;
+        }
+
+        public Long getResponseTimeout() {
+            return responseTimeout;
+        }
+
+        public void setResponseTimeout(Long responseTimeout) {
+            this.responseTimeout = responseTimeout;
         }
     }
 

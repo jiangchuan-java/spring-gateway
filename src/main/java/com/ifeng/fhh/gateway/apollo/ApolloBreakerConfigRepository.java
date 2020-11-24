@@ -2,7 +2,6 @@ package com.ifeng.fhh.gateway.apollo;
 
 import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigService;
-import org.springframework.stereotype.Repository;
 
 /**
  * @Des: apollo breaker配置中心

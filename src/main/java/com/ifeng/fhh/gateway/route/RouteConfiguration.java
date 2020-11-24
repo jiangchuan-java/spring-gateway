@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import static org.springframework.cloud.gateway.support.RouteMetadataUtils.CONNECT_TIMEOUT_ATTR;
+import static org.springframework.cloud.gateway.support.RouteMetadataUtils.RESPONSE_TIMEOUT_ATTR;
+
 /**
  * @Des:
  * @Author: jiangchuan
@@ -24,7 +27,7 @@ public class RouteConfiguration {
                 // Add a simple re-route from: /get to: http://httpbin.org:80
                 // Add a simple "Hello:World" HTTP Header
                 .route(r-> r.path("/zmt-service/**")
-                        .uri("lb://aaa")) // forward to httpbin
+                        .uri("http://www.baidu.com").metadata(RESPONSE_TIMEOUT_ATTR,100).metadata(CONNECT_TIMEOUT_ATTR,100)) // forward to httpbin
                 .build();
     }
 
