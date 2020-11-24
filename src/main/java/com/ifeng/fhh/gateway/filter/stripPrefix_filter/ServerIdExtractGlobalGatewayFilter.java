@@ -1,6 +1,6 @@
 package com.ifeng.fhh.gateway.filter.stripPrefix_filter;
 
-import com.ifeng.fhh.gateway.filter.GatewayUtil;
+import com.ifeng.fhh.gateway.filter.GatewayPropertyUtil;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -48,7 +48,7 @@ public class ServerIdExtractGlobalGatewayFilter implements GlobalFilter, Ordered
 
         exchange.getAttributes().put(GATEWAY_REQUEST_URL_ATTR,
                 newRequest.getURI());
-        exchange.getAttributes().put(GatewayUtil.SERVER_ID, serverId);
+        exchange.getAttributes().put(GatewayPropertyUtil.SERVER_ID, serverId);
 
         return chain.filter(exchange.mutate().request(newRequest).build());
     }

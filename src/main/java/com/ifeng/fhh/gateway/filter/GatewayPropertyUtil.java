@@ -6,7 +6,7 @@ package com.ifeng.fhh.gateway.filter;
  * <p>
  * @Date: 20-11-18
  */
-public class GatewayUtil {
+public class GatewayPropertyUtil {
 
     public static final String SERVER_ID = "serverId";
 }

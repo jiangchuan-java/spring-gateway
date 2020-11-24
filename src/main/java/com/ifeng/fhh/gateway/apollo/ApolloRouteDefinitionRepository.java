@@ -129,6 +129,11 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
             routeDefinition.setPredicates(predicateDef);
             routeDefinition.setFilters(defaultFD);
             routeDefinition.setId(routeModel.getServiceId());
+            /*
+              NettyRoutingFilter中读取以下属性，生成netty httpclient
+              route.getMetadata().get(RESPONSE_TIMEOUT_ATTR); //单位毫秒
+              route.getMetadata().get(CONNECT_TIMEOUT_ATTR); //单位毫秒
+             */
             if(connectTimeout != null){
                 routeDefinition.getMetadata().put(CONNECT_TIMEOUT_ATTR, connectTimeout);
             }

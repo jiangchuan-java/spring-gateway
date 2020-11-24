@@ -1,6 +1,6 @@
 package com.ifeng.fhh.gateway.filter.breaker_filter;
 
-import com.ifeng.fhh.gateway.filter.GatewayUtil;
+import com.ifeng.fhh.gateway.filter.GatewayPropertyUtil;
 import com.ifeng.fhh.gateway.filter.loadbalance_filter.LoadbalanceGlobalGatewayFilter;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
@@ -54,7 +54,7 @@ public class BreakerGlobalGatewayFilter implements GlobalFilter, Ordered {
 
         String requestPath = exchange.getRequest().getPath().value();
 
-        String serverId = exchange.getAttribute(GatewayUtil.SERVER_ID);
+        String serverId = exchange.getAttribute(GatewayPropertyUtil.SERVER_ID);
 
         CircuitBreaker circuitBreaker = breakerMap.get(serverId);
         if(circuitBreaker == null){
@@ -92,6 +92,7 @@ public class BreakerGlobalGatewayFilter implements GlobalFilter, Ordered {
     public int getOrder() {
         return order;
     }
+
 
     public void setOrder(int order) {
         this.order = order;
