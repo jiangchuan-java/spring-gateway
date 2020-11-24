@@ -14,10 +14,10 @@ import com.ifeng.fhh.gateway.filter.stripPrefix_filter.ServerIdExtractGlobalGate
  */
 public enum FilterOrderDefine {
 
-    //提取serverId的filter
-    STRIPPREFIX_GLOBAL_GATEWAYFILTER(ServerIdExtractGlobalGatewayFilter.class, 1),
     //prometheus指标采集filter
-    MONITOR_GLOBAL_GATEWAYFILTER(MonitorGlobalGatewayFilter.class, 2),
+    MONITOR_GLOBAL_GATEWAYFILTER(MonitorGlobalGatewayFilter.class, 1),
+    //提取serverId的filter
+    STRIPPREFIX_GLOBAL_GATEWAYFILTER(ServerIdExtractGlobalGatewayFilter.class, 2),
     //熔断器filter
     BREAKER_GLOBAL_GATEWAYFILTER(BreakerGlobalGatewayFilter.class, 3),
     //自定义负载均衡filter

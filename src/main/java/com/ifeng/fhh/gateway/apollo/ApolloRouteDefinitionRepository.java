@@ -39,7 +39,7 @@ import static org.springframework.cloud.gateway.support.NameUtils.normalizeRoute
  * <p>
  * @Date: 20-11-3
  */
-//@Repository
+@Repository
 public class ApolloRouteDefinitionRepository implements RouteDefinitionRepository, ApplicationEventPublisherAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApolloRouteDefinitionRepository.class);
