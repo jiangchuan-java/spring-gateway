@@ -39,7 +39,7 @@ public class BreakerGlobalGatewayFilter implements GlobalFilter, Ordered {
     private int order;
 
 
-    private static final CircuitBreakerConfig breakerConfig = CircuitBreakerConfig.custom()
+    private static final CircuitBreakerConfig defaultBreakerConfig = CircuitBreakerConfig.custom()
             .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED) /*固定大小，不做限流就简单点*/
             .slidingWindowSize(100) /*每100次计算一次,如果是时间类型的：单位就是秒*/
             .minimumNumberOfCalls(100) /*最少调用100次才能进行统计*/
@@ -110,7 +110,7 @@ public class BreakerGlobalGatewayFilter implements GlobalFilter, Ordered {
             synchronized (String.class) {
                 breaker = breakerMap.get(serverId);
                 if(breaker == null){
-                    CircuitBreakerRegistry registry = CircuitBreakerRegistry.of(breakerConfig);
+                    CircuitBreakerRegistry registry = CircuitBreakerRegistry.of(defaultBreakerConfig);
                     breaker= registry.circuitBreaker(serverId);
                     breakerMap.put(serverId, breaker);
                     LOGGER.info("init {} breaker", serverId);

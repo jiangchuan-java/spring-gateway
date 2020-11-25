@@ -4,14 +4,16 @@ import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigChangeListener;
 import com.ctrip.framework.apollo.ConfigService;
 import com.ctrip.framework.apollo.model.ConfigChangeEvent;
-import com.ifeng.fhh.gateway.filter.loadbalance_filter.LoadbalanceGlobalGatewayFilter;
+import com.ifeng.fhh.gateway.filter.breaker_filter.BreakerGlobalGatewayFilter;
 import com.ifeng.fhh.gateway.util.JackSonUtils;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.gateway.route.RouteDefinition;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
@@ -25,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>
  * @Date: 20-11-23
  */
-//@Repository
+@Repository
 public class ApolloBreakerConfigRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApolloBreakerConfigRepository.class);
@@ -42,6 +44,10 @@ public class ApolloBreakerConfigRepository {
 
     private Config apolloConfig;
 
+    @Autowired
+    private BreakerGlobalGatewayFilter breakerGlobalGatewayFilter;
+
+
     public ApolloBreakerConfigRepository() {
         apolloConfig = ConfigService.getConfig(BREAKER_CONFIG_NAMESPACE);
     }
@@ -55,8 +61,10 @@ public class ApolloBreakerConfigRepository {
             CircuitBreaker breaker = buildCircuitBreaker(breakerModel);
             if (Objects.nonNull(breaker)) {
                 breakerCache.put(serviceId, breaker);
+                noticeBreakerFilterUpdate(serviceId, breaker);
             }
         }
+        apolloConfig.addChangeListener(new BreakerConfigChangeListener());
     }
 
     /**
@@ -67,6 +75,16 @@ public class ApolloBreakerConfigRepository {
         String serviceId = breakerModel.getServiceId();
         CircuitBreaker breaker = buildCircuitBreaker(breakerModel);
         breakerCache.put(serviceId, breaker);
+        noticeBreakerFilterUpdate(serviceId, breaker);
+    }
+
+    /**
+     * 更新filter中目前使用的filter
+     * @param serviceId
+     * @param breaker
+     */
+    private void noticeBreakerFilterUpdate(String serviceId, CircuitBreaker breaker) {
+        breakerGlobalGatewayFilter.updateBreakerMap(serviceId, breaker);
     }
 
     /**
@@ -75,6 +93,7 @@ public class ApolloBreakerConfigRepository {
      * @return
      */
     private CircuitBreaker buildCircuitBreaker(ApolloBreakerModel breakerModel) {
+        String serviceId = breakerModel.getServiceId();
         CircuitBreakerConfig.Builder builder = CircuitBreakerConfig.custom();
         if (Objects.equals(breakerModel.getSlidingWindowType(), SLIDING_WINDOW_TYPE_TIME)) {
             builder = builder.slidingWindowType(CircuitBreakerConfig.SlidingWindowType.TIME_BASED);
@@ -86,8 +105,11 @@ public class ApolloBreakerConfigRepository {
         builder = builder.waitDurationInOpenState(Duration.ofSeconds(breakerModel.waitDurationInOpenState));
         builder = builder.permittedNumberOfCallsInHalfOpenState(breakerModel.permittedNumberOfCallsInHalfOpenState);
         CircuitBreakerConfig breakerConfig = builder.build();
-
         CircuitBreaker breaker = CircuitBreakerRegistry.of(breakerConfig).circuitBreaker(breakerModel.getServiceId());
+
+
+        LOGGER.info("build new breaker {} : {}", serviceId, breaker);
+
         return breaker;
     }
 
@@ -101,7 +123,7 @@ public class ApolloBreakerConfigRepository {
                     String newValue = changeEvent.getChange(serverName).getNewValue();
                     String oldValue = changeEvent.getChange(serverName).getOldValue();
 
-                    LOGGER.info("RouteDefinitonChangeListener, serverName : {} changed, oldValue: {}, newValue: {}"
+                    LOGGER.info("BreakerConfigChangeListener, serverId : {} changed, oldValue: {}, newValue: {}"
                             , serverName, oldValue, newValue);
                     ApolloBreakerModel newConfig = JackSonUtils.json2Bean(newValue, ApolloBreakerModel.class);
 
@@ -109,9 +131,23 @@ public class ApolloBreakerConfigRepository {
 
                 }
             } catch (Exception e) {
-                LOGGER.error("RouteDefinitonChangeListener failed exception: {}", e);
+                LOGGER.error("BreakerConfigChangeListener failed exception: {}", e);
             }
         }
+    }
+
+    @Test
+    public void printBreakerJson() throws Exception{
+        ApolloBreakerModel apolloBreakerModel = new ApolloBreakerModel();
+        apolloBreakerModel.serviceId = "fhh-service";
+        apolloBreakerModel.slidingWindowType = SLIDING_WINDOW_TYPE_COUNT;
+        apolloBreakerModel.slidingWindowSize = 100;
+        apolloBreakerModel.minimumNumberOfCalls = 100;
+        apolloBreakerModel.failureRateThreshold = 80;
+        apolloBreakerModel.waitDurationInOpenState = 10;
+        apolloBreakerModel.permittedNumberOfCallsInHalfOpenState = 20;
+
+        System.out.println(JackSonUtils.bean2Json(apolloBreakerModel));
     }
 
 

@@ -69,13 +69,6 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
      *
      * 注意 serviceId 是请求时，用于区分业务的
      *     lb://xxx 中 xxx代表的是naocs 服务名称
-     *
-     * JSONObject jsonObject = new JSONObject();
-     * jsonObject.put("serviceId","zmt-service");
-     * jsonObject.put("uri","lb://fhh-test");
-     * RouteDefinition routeDefinition = buildRouteDefinition(jsonObject.toJSONString());
-     * routeDefinitionCache.put(routeDefinition.getId(), routeDefinition);
-     *
      */
     @PostConstruct
     private void initRepository() throws Exception{
@@ -160,7 +153,7 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
                     String newValue = changeEvent.getChange(serverName).getNewValue();
                     String oldValue = changeEvent.getChange(serverName).getOldValue();
 
-                    LOGGER.info("RouteDefinitonChangeListener, serverName : {} changed, oldValue: {}, newValue: {}"
+                    LOGGER.info("RouteDefinitonChangeListener, serverId : {} changed, oldValue: {}, newValue: {}"
                             , serverName, oldValue, newValue);
                     ApolloRouteModel newConfig = JackSonUtils.json2Bean(newValue, ApolloRouteModel.class);
 
