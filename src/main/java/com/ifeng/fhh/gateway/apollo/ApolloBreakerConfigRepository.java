@@ -9,7 +9,6 @@ import com.ifeng.fhh.gateway.util.JackSonUtils;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,21 +134,6 @@ public class ApolloBreakerConfigRepository {
             }
         }
     }
-
-    @Test
-    public void printBreakerJson() throws Exception{
-        ApolloBreakerModel apolloBreakerModel = new ApolloBreakerModel();
-        apolloBreakerModel.serviceId = "fhh-service";
-        apolloBreakerModel.slidingWindowType = SLIDING_WINDOW_TYPE_COUNT;
-        apolloBreakerModel.slidingWindowSize = 100;
-        apolloBreakerModel.minimumNumberOfCalls = 100;
-        apolloBreakerModel.failureRateThreshold = 80;
-        apolloBreakerModel.waitDurationInOpenState = 10;
-        apolloBreakerModel.permittedNumberOfCallsInHalfOpenState = 20;
-
-        System.out.println(JackSonUtils.bean2Json(apolloBreakerModel));
-    }
-
 
     private static class ApolloBreakerModel {
 
