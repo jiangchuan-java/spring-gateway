@@ -42,12 +42,14 @@ public class MonitorGlobalGatewayFilter implements GlobalFilter, Ordered {
         String requestPath = exchange.getRequest().getPath().value();
         Histogram.Timer requestTimer = requestLatency.labels(requestPath).startTimer();
 
+        long begin = System.currentTimeMillis();
         return chain.filter(exchange).doFinally(new Consumer<SignalType>() {
             @Override
             public void accept(SignalType signalType) {
                 requestTimer.observeDuration();
+                long end = System.currentTimeMillis();
                 long contentLength = exchange.getResponse().getHeaders().getContentLength();
-                LOGGER.info("requestPath : {}, signalType : {}, resp : {}", requestPath, signalType, contentLength);
+                LOGGER.info("requestPath : {}, signalType : {}, bytes : {}, cos : {}", requestPath, signalType, contentLength, (end-begin));
             }
         });
     }
