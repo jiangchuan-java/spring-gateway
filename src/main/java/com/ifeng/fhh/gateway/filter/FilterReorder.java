@@ -18,9 +18,9 @@ import java.util.Map;
  * @Date: 20-11-18
  */
 @Component
-public class FilterOrderUpdater implements BeanPostProcessor {
+public class FilterReorder implements BeanPostProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FilterOrderUpdater.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FilterReorder.class);
 
     private Map<Class, Integer> filterClassOrderInfo = new HashMap<>();
 

@@ -1,7 +1,7 @@
-package com.ifeng.fhh.gateway.filter.loadbalance_filter.lber_factory;
+package com.ifeng.fhh.gateway.filter.loadbalance_filter.lb_factory;
 
-import com.ifeng.fhh.gateway.filter.loadbalance_filter.discover.AbstractInstanceDiscover;
-import com.ifeng.fhh.gateway.filter.loadbalance_filter.discover.NacosInstanceDiscoverer;
+import com.ifeng.fhh.gateway.filter.loadbalance_filter.instance_discover.AbstractInstanceDiscover;
+import com.ifeng.fhh.gateway.filter.loadbalance_filter.instance_discover.NacosInstanceDiscoverer;
 import com.ifeng.fhh.gateway.filter.loadbalance_filter.lb_algorithm.AbstractLBAlgorithm;
 import com.ifeng.fhh.gateway.filter.loadbalance_filter.lb_algorithm.RandomLBAlgorithm;
 import org.springframework.beans.BeansException;

@@ -4,11 +4,12 @@ import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigChangeListener;
 import com.ctrip.framework.apollo.ConfigService;
 import com.ctrip.framework.apollo.model.ConfigChangeEvent;
-import com.ifeng.fhh.gateway.filter.loadbalance_filter.discover.NacosInstanceDiscoverer;
+import com.ifeng.fhh.gateway.filter.loadbalance_filter.instance_discover.NacosInstanceDiscoverer;
 import com.ifeng.fhh.gateway.util.JackSonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
 import org.springframework.cloud.gateway.filter.FilterDefinition;
 import org.springframework.cloud.gateway.handler.predicate.PathRoutePredicateFactory;
@@ -49,21 +50,18 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
     @Autowired
     private NacosInstanceDiscoverer nacosInstanceDiscoverer;
 
+    @Value("route-definition")
+    private String apollo_route_config_namespace;
+
     private Config apolloConfig;
 
     private ConcurrentHashMap<String/*serviceId*/, RouteDefinition/*路由定义*/> routeDefinitionCache = new ConcurrentHashMap<>();
-
-    private static final String ROUTE_DEFINITION_NAMESPACE = "route-definition";
 
     private ApplicationEventPublisher applicationEventPublisher;
 
     private static final List<PredicateDefinition> defalutPD = new ArrayList<>();
     private static final List<FilterDefinition> defaultFD = new ArrayList<>();
 
-
-    public ApolloRouteDefinitionRepository(){
-        apolloConfig = ConfigService.getConfig(ROUTE_DEFINITION_NAMESPACE);
-    }
 
     /**
      *
@@ -72,6 +70,7 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
      */
     @PostConstruct
     private void initRepository() throws Exception{
+        apolloConfig = ConfigService.getConfig(apollo_route_config_namespace);
         Set<String> serviceIdSet = apolloConfig.getPropertyNames();
         for(String serviceId : serviceIdSet){
             String routeDefinitionValue = apolloConfig.getProperty(serviceId, null);

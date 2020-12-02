@@ -1,4 +1,4 @@
-package com.ifeng.fhh.gateway.filter.loadbalance_filter.discover;
+package com.ifeng.fhh.gateway.filter.loadbalance_filter.instance_discover;
 
 import org.springframework.cloud.client.ServiceInstance;
 

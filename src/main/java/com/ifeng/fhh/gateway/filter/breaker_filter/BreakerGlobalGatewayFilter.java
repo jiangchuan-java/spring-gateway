@@ -1,6 +1,6 @@
 package com.ifeng.fhh.gateway.filter.breaker_filter;
 
-import com.ifeng.fhh.gateway.filter.GatewayPropertyUtil;
+import com.ifeng.fhh.gateway.util.GatewayPropertyUtil;
 import com.ifeng.fhh.gateway.filter.loadbalance_filter.LoadbalanceGlobalGatewayFilter;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;

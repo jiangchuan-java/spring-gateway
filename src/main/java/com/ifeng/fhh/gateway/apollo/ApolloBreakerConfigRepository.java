@@ -12,6 +12,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
@@ -31,11 +32,13 @@ public class ApolloBreakerConfigRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApolloBreakerConfigRepository.class);
 
+    @Value("breaker-config")
+    private String apollo_breaker_config_namespace;
+
+    @Autowired
+    private BreakerGlobalGatewayFilter breakerGlobalGatewayFilter;
 
     private ConcurrentHashMap<String/*serverId*/, CircuitBreaker> breakerCache = new ConcurrentHashMap<>();
-
-    private static final String BREAKER_CONFIG_NAMESPACE = "breaker-config";
-
 
     private static final String SLIDING_WINDOW_TYPE_TIME = "TIME";
 
@@ -43,16 +46,10 @@ public class ApolloBreakerConfigRepository {
 
     private Config apolloConfig;
 
-    @Autowired
-    private BreakerGlobalGatewayFilter breakerGlobalGatewayFilter;
-
-
-    public ApolloBreakerConfigRepository() {
-        apolloConfig = ConfigService.getConfig(BREAKER_CONFIG_NAMESPACE);
-    }
 
     @PostConstruct
     private void initRepository() throws Exception {
+        apolloConfig = ConfigService.getConfig(apollo_breaker_config_namespace);
         Set<String> serviceIdSet = apolloConfig.getPropertyNames();
         for (String serviceId : serviceIdSet) {
             String routeDefinitionValue = apolloConfig.getProperty(serviceId, null);

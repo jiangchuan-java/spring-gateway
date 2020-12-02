@@ -1,7 +1,7 @@
-package com.ifeng.fhh.gateway.filter.loadbalance_filter.lber_factory;
+package com.ifeng.fhh.gateway.filter.loadbalance_filter.lb_factory;
 
 import com.ifeng.fhh.gateway.filter.loadbalance_filter.LoadbalanceGlobalGatewayFilter;
-import com.ifeng.fhh.gateway.filter.loadbalance_filter.discover.AbstractInstanceDiscover;
+import com.ifeng.fhh.gateway.filter.loadbalance_filter.instance_discover.AbstractInstanceDiscover;
 import com.ifeng.fhh.gateway.filter.loadbalance_filter.lb_algorithm.AbstractLBAlgorithm;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.DefaultResponse;

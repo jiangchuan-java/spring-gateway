@@ -1,4 +1,4 @@
-package com.ifeng.fhh.gateway.filter;
+package com.ifeng.fhh.gateway.util;
 
 /**
  * @Des:

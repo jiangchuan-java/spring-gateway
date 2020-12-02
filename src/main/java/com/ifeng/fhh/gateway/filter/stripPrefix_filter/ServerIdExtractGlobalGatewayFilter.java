@@ -1,6 +1,6 @@
 package com.ifeng.fhh.gateway.filter.stripPrefix_filter;
 
-import com.ifeng.fhh.gateway.filter.GatewayPropertyUtil;
+import com.ifeng.fhh.gateway.util.GatewayPropertyUtil;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;

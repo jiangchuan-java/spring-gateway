@@ -1,6 +1,6 @@
 package com.ifeng.fhh.gateway.filter.loadbalance_filter;
 
-import com.ifeng.fhh.gateway.filter.loadbalance_filter.lber_factory.AbstractLoadBalancerFactory;
+import com.ifeng.fhh.gateway.filter.loadbalance_filter.lb_factory.AbstractLoadBalancerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.ServiceInstance;
@@ -9,7 +9,6 @@ import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
-import org.springframework.cloud.gateway.route.Route;
 import org.springframework.cloud.gateway.support.DelegatingServiceInstance;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
@@ -59,8 +58,7 @@ public class LoadbalanceGlobalGatewayFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        Route route = exchange.getAttribute(GATEWAY_ROUTE_ATTR);
-        URI url = route.getUri();
+        URI url = exchange.getAttribute(GATEWAY_REQUEST_URL_ATTR);
         String schemePrefix = exchange.getAttribute(GATEWAY_SCHEME_PREFIX_ATTR);
         if (url == null
                 || (!"lb".equals(url.getScheme()) && !"lb".equals(schemePrefix))) {

@@ -1,4 +1,4 @@
-package com.ifeng.fhh.gateway.filter.loadbalance_filter.discover;
+package com.ifeng.fhh.gateway.filter.loadbalance_filter.instance_discover;
 
 import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingFactory;
