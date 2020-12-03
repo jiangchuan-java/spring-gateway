@@ -50,8 +50,8 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
     @Autowired
     private NacosInstanceDiscoverer nacosInstanceDiscoverer;
 
-    @Value("route-definition")
-    private String apollo_route_config_namespace;
+    @Value("${apollo.namespace.route-definition}")
+    private String namespace;
 
     private Config apolloConfig;
 
@@ -70,7 +70,7 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
      */
     @PostConstruct
     private void initRepository() throws Exception{
-        apolloConfig = ConfigService.getConfig(apollo_route_config_namespace);
+        apolloConfig = ConfigService.getConfig(namespace);
         Set<String> serviceIdSet = apolloConfig.getPropertyNames();
         for(String serviceId : serviceIdSet){
             String routeDefinitionValue = apolloConfig.getProperty(serviceId, null);

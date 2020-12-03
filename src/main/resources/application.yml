@@ -10,6 +10,9 @@ app:
   id: @app.id@
 apollo:
   meta: @apollo.meta@
+  namespace:
+    route-definition: @apollo.namespace.route-definition@
+    breaker-config: @apollo.namespace.breaker-config@
 
 management:
   endpoint:

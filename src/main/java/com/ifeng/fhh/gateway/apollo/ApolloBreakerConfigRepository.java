@@ -32,8 +32,8 @@ public class ApolloBreakerConfigRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApolloBreakerConfigRepository.class);
 
-    @Value("breaker-config")
-    private String apollo_breaker_config_namespace;
+    @Value("${apollo.namespace.breaker-config}")
+    private String namespace;
 
     @Autowired
     private BreakerGlobalGatewayFilter breakerGlobalGatewayFilter;
@@ -49,7 +49,7 @@ public class ApolloBreakerConfigRepository {
 
     @PostConstruct
     private void initRepository() throws Exception {
-        apolloConfig = ConfigService.getConfig(apollo_breaker_config_namespace);
+        apolloConfig = ConfigService.getConfig(namespace);
         Set<String> serviceIdSet = apolloConfig.getPropertyNames();
         for (String serviceId : serviceIdSet) {
             String routeDefinitionValue = apolloConfig.getProperty(serviceId, null);

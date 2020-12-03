@@ -162,6 +162,8 @@
                 <!--apollo config-->
                 <app.id>fhh-gateway</app.id>
                 <apollo.meta>http://meta-dev.config.ifengidc.com</apollo.meta>
+                <apollo.namespace.route-definition>route-definition</apollo.namespace.route-definition>
+                <apollo.namespace.breaker-config>breaker-config</apollo.namespace.breaker-config>
                 <!--apollo config-->
             </properties>
         </profile>
@@ -174,6 +176,22 @@
                 <!--apollo config-->
                 <app.id>fhh-gateway</app.id>
                 <apollo.meta>http://meta-pro.config.ifengidc.com</apollo.meta>
+                <apollo.namespace.route-definition>route-definition</apollo.namespace.route-definition>
+                <apollo.namespace.breaker-config>breaker-config</apollo.namespace.breaker-config>
+                <!--apollo config-->
+            </properties>
+        </profile>
+
+        <profile>
+            <id>wechat-applet-prod</id>
+            <properties>
+                <nacos.serverAddr>http://nacos.ifeng.com:80</nacos.serverAddr>
+                <nacos.namespace.gateway>dbeb3e5c-a28b-453f-997c-8f47c0882acf</nacos.namespace.gateway>
+                <!--apollo config-->
+                <app.id>wechat-applet-gateway</app.id>
+                <apollo.meta>http://meta-pro.config.ifengidc.com</apollo.meta>
+                <apollo.namespace.route-definition>route-definition</apollo.namespace.route-definition>
+                <apollo.namespace.breaker-config>breaker-config</apollo.namespace.breaker-config>
                 <!--apollo config-->
             </properties>
         </profile>
