@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -39,7 +40,10 @@ public class AbstractRouteDefinitionRepository implements RouteDefinitionReposit
     public final void updateRepository(String serviceId, RouteDefinition routeDefinition){
         routeDefinitionCache.put(serviceId, routeDefinition);
         publishRouteDefinitonRefreshEvent();
-        publishInstanceRefreshEvent(routeDefinition);
+        String scheme = routeDefinition.getUri().getScheme();
+        if(Objects.equals(scheme,"lb")){
+            publishInstanceRefreshEvent(routeDefinition);
+        }
     }
 
     private void publishInstanceRefreshEvent(RouteDefinition routeDefinition) {
