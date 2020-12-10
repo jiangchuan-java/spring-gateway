@@ -99,7 +99,7 @@ public class ApolloRouteDefinitionRepository extends AbstractRouteDefinitionRepo
                 routeDefinition.getMetadata().put(RESPONSE_TIMEOUT_ATTR, responseTimeout);
             }
 
-            LOGGER.info("build new route : {}", routeDefinition.toString());
+            LOGGER.info("********** build new route : {}", routeDefinition.toString());
 
             return routeDefinition;
 
@@ -118,7 +118,7 @@ public class ApolloRouteDefinitionRepository extends AbstractRouteDefinitionRepo
                     String newValue = changeEvent.getChange(serverName).getNewValue();
                     String oldValue = changeEvent.getChange(serverName).getOldValue();
 
-                    LOGGER.info("RouteDefinitonChangeListener, serverId : {} changed, oldValue: {}, newValue: {}"
+                    LOGGER.info("**********  RouteDefinitonChangeListener, serverId : {} changed, oldValue: {}, newValue: {}"
                             , serverName, oldValue, newValue);
                     ApolloRouteModel newConfig = JackSonUtils.json2Bean(newValue, ApolloRouteModel.class);
 
@@ -126,7 +126,7 @@ public class ApolloRouteDefinitionRepository extends AbstractRouteDefinitionRepo
 
                 }
             } catch (Exception e) {
-                LOGGER.error("RouteDefinitonChangeListener failed exception: {}", e);
+                LOGGER.error("********** RouteDefinitonChangeListener failed exception: {}", e);
             }
         }
     }

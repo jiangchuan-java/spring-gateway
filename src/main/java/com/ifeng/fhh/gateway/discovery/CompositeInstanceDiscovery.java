@@ -70,7 +70,7 @@ public class CompositeInstanceDiscovery implements ApplicationContextAware, Appl
         discoveryList.forEach(discovery->{
             discovery.refreshInstanceCache(host);
         });
-        LOGGER.info("********** RefreshInstancesEvent host : {} **********", host);
+        LOGGER.info("********** RefreshInstancesEvent host : {}", host);
     }
 
 

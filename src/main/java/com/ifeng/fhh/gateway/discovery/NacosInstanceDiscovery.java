@@ -65,7 +65,7 @@ public class NacosInstanceDiscovery extends AbstractInstanceDiscovery {
             List<ServiceInstance> serverInstanceList = new ArrayList<>();
             List<Instance> nacosInstanceList = namingService.selectInstances(host, true);
             serverInstanceList = transferTo(nacosInstanceList);
-            LOGGER.info("init host: {} server instatnces : {}", host, serverInstanceList.size());
+            LOGGER.info("********** init host: {} server instatnces : {}", host, serverInstanceList.size());
             if(subscribeList.contains(host)){
                 return serverInstanceList;
             }
@@ -103,7 +103,7 @@ public class NacosInstanceDiscovery extends AbstractInstanceDiscovery {
                 List<ServiceInstance> serviceInstanceList = transferTo(nacosInstanceList);
                 //DEFAULT_GROUP@@fhh-api
                 internalRefresh(serviceName, serviceInstanceList);
-                LOGGER.info(" {} nacos update : {}", serviceName, serviceInstanceList.size());
+                LOGGER.info("********** {} nacos update : {}", serviceName, serviceInstanceList.size());
             }
         }
     }
