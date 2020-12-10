@@ -1,4 +1,4 @@
-package com.ifeng.fhh.gateway.apollo;
+package com.ifeng.fhh.gateway.breaker;
 
 import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigChangeListener;
@@ -22,7 +22,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @Des: apollo breaker配置中心
+ * todo 这里应解耦，参考路由定义与注册中心
+ * @Des: breaker breaker配置中心
  * @Author: jiangchuan
  * <p>
  * @Date: 20-11-23

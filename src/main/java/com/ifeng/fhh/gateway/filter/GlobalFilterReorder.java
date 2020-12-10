@@ -7,7 +7,6 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,21 +17,20 @@ import java.util.Map;
  * @Date: 20-11-18
  */
 @Component
-public class FilterReorder implements BeanPostProcessor {
+public class GlobalFilterReorder implements BeanPostProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FilterReorder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalFilterReorder.class);
 
     private Map<Class, Integer> filterClassOrderInfo = new HashMap<>();
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         Class<?> beanClass = bean.getClass();
-        if(filterClassOrderInfo.containsKey(beanClass)){
+        if(filterClassOrderInfo.containsKey(beanClass) && filterClassOrderInfo instanceof OrderedGlobalFilter){
             int order = filterClassOrderInfo.get(beanClass);
             try {
-                Field orderField = beanClass.getDeclaredField("order");
-                orderField.setAccessible(true);
-                orderField.set(bean, order);
+                OrderedGlobalFilter orderedGlobalFilter = (OrderedGlobalFilter) bean;
+                orderedGlobalFilter.setOrder(order);
                 LOGGER.info("update filter bean : {}, order: {}", beanClass.getSimpleName(), order);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -44,8 +42,8 @@ public class FilterReorder implements BeanPostProcessor {
 
     @PostConstruct
     private void initOrderInfo() throws Exception{
-        FilterOrderDefine[] filters = FilterOrderDefine.values();
-        for (FilterOrderDefine filter : filters) {
+        GlobalFilterOrderDefine[] filters = GlobalFilterOrderDefine.values();
+        for (GlobalFilterOrderDefine filter : filters) {
             Class clazz = filter.getClazz();
             int order = filter.getOrder();
             filterClassOrderInfo.put(clazz, order);

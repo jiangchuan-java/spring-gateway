@@ -1,5 +1,6 @@
 package com.ifeng.fhh.gateway.filter.monitor_filter;
 
+import com.ifeng.fhh.gateway.filter.OrderedGlobalFilter;
 import io.prometheus.client.Histogram;
 import io.prometheus.client.hotspot.DefaultExports;
 import org.slf4j.Logger;
@@ -21,12 +22,10 @@ import java.util.function.Consumer;
  * @Date: 20-10-28
  */
 @Component
-public class MonitorGlobalGatewayFilter implements GlobalFilter, Ordered {
+public class MonitorGlobalGatewayFilter extends OrderedGlobalFilter {
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MonitorGlobalGatewayFilter.class);
-
-    private int order;
 
     private static final Histogram requestLatency = Histogram.build()
             .name("FHH_GATEWAY_REQUEST").labelNames("requestPath").help("Request latency in seconds.").register();
@@ -52,14 +51,5 @@ public class MonitorGlobalGatewayFilter implements GlobalFilter, Ordered {
                 LOGGER.info("requestPath : {}, signalType : {}, bytes : {}, cos : {}", requestPath, signalType, contentLength, (end-begin));
             }
         });
-    }
-
-    @Override
-    public int getOrder() {
-        return order;
-    }
-
-    public void setOrder(int order) {
-        this.order = order;
     }
 }

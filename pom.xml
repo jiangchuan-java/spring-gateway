@@ -62,7 +62,7 @@
             <version>4.12</version>
         </dependency>
 
-        <!--apollo-->
+        <!--breaker-->
         <dependency>
             <groupId>com.ctrip.framework.apollo</groupId>
             <artifactId>apollo-client</artifactId>
@@ -159,12 +159,12 @@
             <properties>
                 <nacos.serverAddr>http://test-nacos.ifeng.com:80</nacos.serverAddr>
                 <nacos.namespace.gateway>74fcd40c-a7c4-4f01-b868-2b5c9ca542ca</nacos.namespace.gateway>
-                <!--apollo config-->
+                <!--breaker config-->
                 <app.id>fhh-gateway</app.id>
                 <apollo.meta>http://meta-dev.config.ifengidc.com</apollo.meta>
                 <apollo.namespace.route-definition>route-definition</apollo.namespace.route-definition>
                 <apollo.namespace.breaker-config>breaker-config</apollo.namespace.breaker-config>
-                <!--apollo config-->
+                <!--breaker config-->
             </properties>
         </profile>
 
@@ -173,12 +173,12 @@
             <properties>
                 <nacos.serverAddr>http://nacos.ifeng.com:80</nacos.serverAddr>
                 <nacos.namespace.gateway>f08578b0-d73b-4238-b83a-0b660d263223</nacos.namespace.gateway>
-                <!--apollo config-->
+                <!--breaker config-->
                 <app.id>fhh-gateway</app.id>
                 <apollo.meta>http://meta-pro.config.ifengidc.com</apollo.meta>
                 <apollo.namespace.route-definition>route-definition</apollo.namespace.route-definition>
                 <apollo.namespace.breaker-config>breaker-config</apollo.namespace.breaker-config>
-                <!--apollo config-->
+                <!--breaker config-->
             </properties>
         </profile>
 
@@ -187,12 +187,12 @@
             <properties>
                 <nacos.serverAddr>http://nacos.ifeng.com:80</nacos.serverAddr>
                 <nacos.namespace.gateway>dbeb3e5c-a28b-453f-997c-8f47c0882acf</nacos.namespace.gateway>
-                <!--apollo config-->
+                <!--breaker config-->
                 <app.id>wechat-applet-gateway</app.id>
                 <apollo.meta>http://meta-pro.config.ifengidc.com</apollo.meta>
                 <apollo.namespace.route-definition>route-definition</apollo.namespace.route-definition>
                 <apollo.namespace.breaker-config>breaker-config</apollo.namespace.breaker-config>
-                <!--apollo config-->
+                <!--breaker config-->
             </properties>
         </profile>
     </profiles>

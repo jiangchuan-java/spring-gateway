@@ -1,26 +1,19 @@
-package com.ifeng.fhh.gateway.apollo;
+package com.ifeng.fhh.gateway.route;
 
 import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigChangeListener;
 import com.ctrip.framework.apollo.ConfigService;
 import com.ctrip.framework.apollo.model.ConfigChangeEvent;
-import com.ifeng.fhh.gateway.filter.loadbalance_filter.instance_discover.NacosInstanceDiscoverer;
 import com.ifeng.fhh.gateway.util.JackSonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
-import org.springframework.cloud.gateway.filter.FilterDefinition;
 import org.springframework.cloud.gateway.handler.predicate.PathRoutePredicateFactory;
 import static org.springframework.cloud.gateway.handler.predicate.PathRoutePredicateFactory.PATTERN_KEY;
 import org.springframework.cloud.gateway.handler.predicate.PredicateDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinition;
-import org.springframework.cloud.gateway.route.RouteDefinitionRepository;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
+
 import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import static org.springframework.cloud.gateway.support.RouteMetadataUtils.CONNECT_TIMEOUT_ATTR;
 import static org.springframework.cloud.gateway.support.RouteMetadataUtils.RESPONSE_TIMEOUT_ATTR;
@@ -28,10 +21,8 @@ import static org.springframework.cloud.gateway.support.RouteMetadataUtils.RESPO
 import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 import static org.springframework.cloud.gateway.support.NameUtils.normalizeRoutePredicateName;
@@ -43,25 +34,14 @@ import static org.springframework.cloud.gateway.support.NameUtils.normalizeRoute
  * @Date: 20-11-3
  */
 @Repository
-public class ApolloRouteDefinitionRepository implements RouteDefinitionRepository, ApplicationEventPublisherAware {
+public class ApolloRouteDefinitionRepository extends AbstractRouteDefinitionRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApolloRouteDefinitionRepository.class);
-
-    @Autowired
-    private NacosInstanceDiscoverer nacosInstanceDiscoverer;
 
     @Value("${apollo.namespace.route-definition}")
     private String namespace;
 
     private Config apolloConfig;
-
-    private ConcurrentHashMap<String/*serviceId*/, RouteDefinition/*路由定义*/> routeDefinitionCache = new ConcurrentHashMap<>();
-
-    private ApplicationEventPublisher applicationEventPublisher;
-
-    private static final List<PredicateDefinition> defalutPD = new ArrayList<>();
-    private static final List<FilterDefinition> defaultFD = new ArrayList<>();
-
 
     /**
      *
@@ -77,30 +57,17 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
             ApolloRouteModel routeModel = JackSonUtils.json2Bean(routeDefinitionValue, ApolloRouteModel.class);
             RouteDefinition routeDefinition = buildRouteDefinition(routeModel);
             if(Objects.nonNull(routeDefinition)){
-                routeDefinitionCache.put(serviceId, routeDefinition);
-                noticeNacos(routeDefinition.getUri().getHost());
+                super.updateRepository(serviceId, routeDefinition);
             }
         }
         apolloConfig.addChangeListener(new RouteDefinitonChangeListener());
-        noticeCachingRouteLocator();
+
     }
 
     private void updateRepository(ApolloRouteModel routeModel){
         String serviceId = routeModel.getServiceId();
         RouteDefinition routeDefinition = buildRouteDefinition(routeModel);
-        routeDefinitionCache.put(serviceId, routeDefinition);
-        noticeNacos(routeDefinition.getUri().getHost());
-        noticeCachingRouteLocator();
-    }
-
-    //通知nacos监听新实例
-    private void noticeNacos(String host) {
-        nacosInstanceDiscoverer.initServerInstanceCache(host);
-    }
-
-    //通知路由缓存刷新
-    private void noticeCachingRouteLocator() {
-        applicationEventPublisher.publishEvent(new RefreshRoutesEvent(this));
+        super.updateRepository(serviceId, routeDefinition);
     }
 
     private RouteDefinition buildRouteDefinition(ApolloRouteModel routeModel) {
@@ -119,7 +86,6 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
             RouteDefinition routeDefinition = new RouteDefinition();
             routeDefinition.setUri(URI.create(routeModel.getUri()));
             routeDefinition.setPredicates(predicateDef);
-            routeDefinition.setFilters(defaultFD);
             routeDefinition.setId(routeModel.getServiceId());
             /*
               NettyRoutingFilter中读取以下属性，生成netty httpclient
@@ -165,12 +131,6 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
         }
     }
 
-
-    @Override
-    public Flux<RouteDefinition> getRouteDefinitions() {
-        return Flux.fromIterable(routeDefinitionCache.values());
-    }
-
     @Override
     public Mono<Void> save(Mono<RouteDefinition> route) {
         return null;
@@ -179,12 +139,6 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
     @Override
     public Mono<Void> delete(Mono<String> routeId) {
         return null;
-    }
-
-
-    @Override
-    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     private static class ApolloRouteModel {
@@ -230,11 +184,4 @@ public class ApolloRouteDefinitionRepository implements RouteDefinitionRepositor
             this.responseTimeout = responseTimeout;
         }
     }
-
-
-
-
-
-
-
 }

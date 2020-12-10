@@ -1,5 +1,6 @@
 package com.ifeng.fhh.gateway.filter.loadbalance_filter;
 
+import com.ifeng.fhh.gateway.filter.OrderedGlobalFilter;
 import com.ifeng.fhh.gateway.filter.loadbalance_filter.lb_factory.AbstractLoadBalancerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,11 +9,9 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.support.DelegatingServiceInstance;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
-import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -32,17 +31,9 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
  * @Date: 20-10-28
  */
 @Component
-public class LoadbalanceGlobalGatewayFilter implements GlobalFilter, Ordered {
+public class LoadbalanceGlobalGatewayFilter extends OrderedGlobalFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoadbalanceGlobalGatewayFilter.class);
-
-    private int order;
-
-    @Override
-    public int getOrder() {
-        return order;
-    }
-
 
     @Resource(name = "randomLoadBalancerFactory")
     private AbstractLoadBalancerFactory abstractLoadBalancerFactory;
@@ -128,11 +119,6 @@ public class LoadbalanceGlobalGatewayFilter implements GlobalFilter, Ordered {
         public void setExchange(ServerWebExchange exchange) {
             this.exchange = exchange;
         }
-    }
-
-
-    public void setOrder(int order) {
-        this.order = order;
     }
 
     public AbstractLoadBalancerFactory getAbstractLoadBalancerFactory() {

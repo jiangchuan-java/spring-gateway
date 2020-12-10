@@ -12,7 +12,7 @@ import com.ifeng.fhh.gateway.filter.stripPrefix_filter.ServerIdExtractGlobalGate
  * <p>
  * @Date: 20-11-18
  */
-public enum FilterOrderDefine {
+public enum GlobalFilterOrderDefine {
 
     //prometheus指标采集filter
     MONITOR_GLOBAL_GATEWAYFILTER(MonitorGlobalGatewayFilter.class, 1),
@@ -27,7 +27,7 @@ public enum FilterOrderDefine {
 
     private int order;
 
-    FilterOrderDefine(Class clazz, int order) {
+    GlobalFilterOrderDefine(Class clazz, int order) {
         this.clazz = clazz;
         this.order = order;
     }

@@ -1,4 +1,4 @@
-package com.ifeng.fhh.gateway.filter.loadbalance_filter.instance_discover;
+package com.ifeng.fhh.gateway.discovery;
 
 import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingFactory;
@@ -24,9 +24,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Date: 20-6-15
  */
 @Component
-public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
+public class NacosInstanceDiscovery extends AbstractInstanceDiscovery {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NacosInstanceDiscoverer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NacosInstanceDiscovery.class);
 
     private NamingService namingService;
 
@@ -35,11 +35,10 @@ public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
 
     private String namespace;
 
+    private Set<String> subscribeList = new HashSet<>();
 
-    private ConcurrentHashMap<String/*serverName*/, List<ServiceInstance>/*可用实例实例*/> serverInstanceCache = new ConcurrentHashMap<>();
 
-
-    public NacosInstanceDiscoverer(@Value("${nacos.serverAddr}") String serverAddr, @Value("${nacos.namespace.gateway}") String namespace) {
+    public NacosInstanceDiscovery(@Value("${nacos.serverAddr}") String serverAddr, @Value("${nacos.namespace.gateway}") String namespace) {
         try {
             this.serverAddr = serverAddr;
             this.namespace = namespace;
@@ -55,28 +54,38 @@ public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
         }
     }
 
-
     /**
      * 初始化实例缓存
      *
      * @param host
      */
-    public void initServerInstanceCache(String host) {
+    @Override
+    public List<ServiceInstance> doRefresh(String host) {
         try {
             List<ServiceInstance> serverInstanceList = new ArrayList<>();
             List<Instance> nacosInstanceList = namingService.selectInstances(host, true);
-            if(serverInstanceCache.containsKey(host)){
-                return;
-            }
-            namingService.subscribe(host, new NacosEventListener(host));
             serverInstanceList = transferTo(nacosInstanceList);
-            serverInstanceCache.put(host, serverInstanceList);
-
             LOGGER.info("init host: {} server instatnces : {}", host, serverInstanceList.size());
+            if(subscribeList.contains(host)){
+                return serverInstanceList;
+            }
+            synchronized (this) { //线程安全的订阅方式，仅订阅一次
+                if(subscribeList.contains(host)){
+                    return serverInstanceList;
+                } else {
+                    namingService.subscribe(host, new NacosEventListener(host));
+                    subscribeList.add(host);
+                }
+            }
+            return serverInstanceList;
+
         } catch (NacosException e) {
             e.printStackTrace();
         }
+        return null;
     }
+
+
 
 
     /**
@@ -93,7 +102,7 @@ public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
                 List<Instance> nacosInstanceList = ((NamingEvent) event).getInstances();
                 List<ServiceInstance> serviceInstanceList = transferTo(nacosInstanceList);
                 //DEFAULT_GROUP@@fhh-api
-                serverInstanceCache.put(serviceName, serviceInstanceList);
+                internalRefresh(serviceName, serviceInstanceList);
                 LOGGER.info(" {} nacos update : {}", serviceName, serviceInstanceList.size());
             }
         }
@@ -118,30 +127,6 @@ public class NacosInstanceDiscoverer extends AbstractInstanceDiscover {
         ServiceInstance serviceInstance = new DefaultServiceInstance(instanceId, ip, port, false);
         return serviceInstance;
     }
-
-
-    /**
-     * 返回当前的实例列表
-     *
-     * @return
-     */
-    @Override
-    public List<ServiceInstance> getCurrentServiceInstances(String host) {
-        List<ServiceInstance> serverInstanceList = serverInstanceCache.get(host);
-        if (Objects.isNull(serverInstanceList)) {
-            try {
-                List<Instance> nacosInstanceList = namingService.selectInstances(host, true);
-                namingService.subscribe(host, new NacosEventListener(host));
-                serverInstanceList = transferTo(nacosInstanceList);
-                serverInstanceCache.put(host, serverInstanceList);
-            } catch (NacosException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-        return serverInstanceList;
-    }
-
 
     public String getServerAddr() {
         return serverAddr;

@@ -1,7 +1,8 @@
 package com.ifeng.fhh.gateway.filter.loadbalance_filter.lb_factory;
 
+import com.ifeng.fhh.gateway.discovery.CompositeInstanceDiscovery;
 import com.ifeng.fhh.gateway.filter.loadbalance_filter.LoadbalanceGlobalGatewayFilter;
-import com.ifeng.fhh.gateway.filter.loadbalance_filter.instance_discover.AbstractInstanceDiscover;
+import com.ifeng.fhh.gateway.discovery.AbstractInstanceDiscovery;
 import com.ifeng.fhh.gateway.filter.loadbalance_filter.lb_algorithm.AbstractLBAlgorithm;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.DefaultResponse;
@@ -41,7 +42,7 @@ public abstract class AbstractLoadBalancerFactory implements ApplicationContextA
      *
      * @return
      */
-    protected abstract AbstractInstanceDiscover buildInstanceDiscover();
+    protected abstract CompositeInstanceDiscovery buildInstanceDiscover();
 
     /**
      * 通过负载均衡算法 +　实例发现工具 = 实例化一个负载均衡器
@@ -49,7 +50,7 @@ public abstract class AbstractLoadBalancerFactory implements ApplicationContextA
      * @return
      */
     public ReactorServiceInstanceLoadBalancer buildLoadBalancer() {
-        AbstractInstanceDiscover instanceDiscover = this.buildInstanceDiscover();
+        CompositeInstanceDiscovery instanceDiscover = this.buildInstanceDiscover();
         AbstractLBAlgorithm lbAlgorithm = this.buildLBAlgorithm();
         LoadBalancer loadBalancer = new LoadBalancer();
         loadBalancer.setInstanceDiscover(instanceDiscover);
@@ -61,11 +62,11 @@ public abstract class AbstractLoadBalancerFactory implements ApplicationContextA
     private static class LoadBalancer implements ReactorServiceInstanceLoadBalancer{
 
 
-
+        //负载均衡算法
         private AbstractLBAlgorithm lbAlgorithm;
 
-
-        private AbstractInstanceDiscover instanceDiscover;
+        //实例发现
+        private CompositeInstanceDiscovery instanceDiscover;
 
 
         @Override
@@ -102,11 +103,11 @@ public abstract class AbstractLoadBalancerFactory implements ApplicationContextA
             this.lbAlgorithm = lbAlgorithm;
         }
 
-        public AbstractInstanceDiscover getInstanceDiscover() {
+        public CompositeInstanceDiscovery getInstanceDiscover() {
             return instanceDiscover;
         }
 
-        public void setInstanceDiscover(AbstractInstanceDiscover instanceDiscover) {
+        public void setInstanceDiscover(CompositeInstanceDiscovery instanceDiscover) {
             this.instanceDiscover = instanceDiscover;
         }
     }

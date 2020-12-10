@@ -1,7 +1,6 @@
 package com.ifeng.fhh.gateway.filter.loadbalance_filter.lb_factory;
 
-import com.ifeng.fhh.gateway.filter.loadbalance_filter.instance_discover.AbstractInstanceDiscover;
-import com.ifeng.fhh.gateway.filter.loadbalance_filter.instance_discover.NacosInstanceDiscoverer;
+import com.ifeng.fhh.gateway.discovery.CompositeInstanceDiscovery;
 import com.ifeng.fhh.gateway.filter.loadbalance_filter.lb_algorithm.AbstractLBAlgorithm;
 import com.ifeng.fhh.gateway.filter.loadbalance_filter.lb_algorithm.RandomLBAlgorithm;
 import org.springframework.beans.BeansException;
@@ -27,8 +26,8 @@ public class RandomLoadBalancerFactory extends AbstractLoadBalancerFactory  {
     }
 
     @Override
-    protected AbstractInstanceDiscover buildInstanceDiscover() {
-        NacosInstanceDiscoverer instanceDiscoverer = applicationContext.getBean(NacosInstanceDiscoverer.class);
+    protected CompositeInstanceDiscovery buildInstanceDiscover() {
+        CompositeInstanceDiscovery instanceDiscoverer = applicationContext.getBean(CompositeInstanceDiscovery.class);
         return instanceDiscoverer;
     }
 

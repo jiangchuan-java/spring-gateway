@@ -1,5 +1,6 @@
 package com.ifeng.fhh.gateway.filter.breaker_filter;
 
+import com.ifeng.fhh.gateway.filter.OrderedGlobalFilter;
 import com.ifeng.fhh.gateway.util.GatewayPropertyUtil;
 import com.ifeng.fhh.gateway.filter.loadbalance_filter.LoadbalanceGlobalGatewayFilter;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
@@ -9,9 +10,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.support.ServiceUnavailableException;
-import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -29,14 +28,12 @@ import java.util.function.Function;
  * @Date: 20-10-28
  */
 @Component
-public class BreakerGlobalGatewayFilter implements GlobalFilter, Ordered {
+public class BreakerGlobalGatewayFilter extends OrderedGlobalFilter {
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoadbalanceGlobalGatewayFilter.class);
 
     private ConcurrentHashMap<String/*serverId*/, CircuitBreaker/*熔断器*/> breakerMap = new ConcurrentHashMap<>();
-
-    private int order;
 
 
     private static final CircuitBreakerConfig defaultBreakerConfig = CircuitBreakerConfig.custom()
@@ -87,17 +84,6 @@ public class BreakerGlobalGatewayFilter implements GlobalFilter, Ordered {
             }
         });
     }
-
-    @Override
-    public int getOrder() {
-        return order;
-    }
-
-
-    public void setOrder(int order) {
-        this.order = order;
-    }
-
 
     /**
      * 线程安全的构建单例对象
