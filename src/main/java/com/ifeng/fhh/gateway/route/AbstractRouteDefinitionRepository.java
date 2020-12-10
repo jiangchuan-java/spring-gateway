@@ -39,6 +39,12 @@ public class AbstractRouteDefinitionRepository implements RouteDefinitionReposit
     public final void updateRepository(String serviceId, RouteDefinition routeDefinition){
         routeDefinitionCache.put(serviceId, routeDefinition);
         publishRouteDefinitonRefreshEvent();
+        publishInstanceRefreshEvent(routeDefinition);
+    }
+
+    private void publishInstanceRefreshEvent(RouteDefinition routeDefinition) {
+        String host = routeDefinition.getUri().getHost();
+        applicationEventPublisher.publishEvent(new RefreshInstancesEvent(this,host));
     }
 
     /**

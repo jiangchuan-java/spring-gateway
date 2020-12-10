@@ -1,6 +1,9 @@
 package com.ifeng.fhh.gateway.discovery;
 
 import com.ifeng.fhh.gateway.route.AbstractRouteDefinitionRepository;
+import com.ifeng.fhh.gateway.route.RefreshInstancesEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
@@ -25,8 +28,9 @@ import java.util.function.Consumer;
  * @Date: 20-12-10
  */
 @Component
-public class CompositeInstanceDiscovery implements ApplicationContextAware, ApplicationListener<RefreshRoutesEvent> {
+public class CompositeInstanceDiscovery implements ApplicationContextAware, ApplicationListener<RefreshInstancesEvent> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompositeInstanceDiscovery.class);
 
     private ApplicationContext applicationContext;
 
@@ -61,23 +65,12 @@ public class CompositeInstanceDiscovery implements ApplicationContextAware, Appl
      * @param event
      */
     @Override
-    public void onApplicationEvent(RefreshRoutesEvent event) {
-        Object source = event.getSource();
-        if(Objects.nonNull(source) && source instanceof AbstractRouteDefinitionRepository){
-            AbstractRouteDefinitionRepository repository = (AbstractRouteDefinitionRepository) source;
-            repository.getRouteDefinitions().subscribe(new Consumer<RouteDefinition>() {
-                @Override
-                public void accept(RouteDefinition routeDefinition) {
-                    URI uri = routeDefinition.getUri();
-                    if(Objects.equals(uri.getScheme(),"lb")){
-                        String host = uri.getHost();
-                        discoveryList.forEach(discovery->{
-                            discovery.refreshInstanceCache(host);
-                        });
-                    }
-                }
-            });
-        }
+    public void onApplicationEvent(RefreshInstancesEvent event) {
+        String host = event.getHost();
+        discoveryList.forEach(discovery->{
+            discovery.refreshInstanceCache(host);
+        });
+        LOGGER.info("********** RefreshInstancesEvent host : {} **********", host);
     }
 
 
