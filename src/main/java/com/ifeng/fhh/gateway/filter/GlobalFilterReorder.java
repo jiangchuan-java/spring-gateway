@@ -26,7 +26,7 @@ public class GlobalFilterReorder implements BeanPostProcessor {
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         Class<?> beanClass = bean.getClass();
-        if(filterClassOrderInfo.containsKey(beanClass) && filterClassOrderInfo instanceof OrderedGlobalFilter){
+        if(filterClassOrderInfo.containsKey(beanClass) && bean instanceof OrderedGlobalFilter){
             int order = filterClassOrderInfo.get(beanClass);
             try {
                 OrderedGlobalFilter orderedGlobalFilter = (OrderedGlobalFilter) bean;
