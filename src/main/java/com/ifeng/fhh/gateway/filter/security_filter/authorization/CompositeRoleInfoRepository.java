@@ -55,7 +55,7 @@ public class CompositeRoleInfoRepository implements ApplicationContextAware, App
         }
     }
 
-    private void fetchRoleInfo(String serviceId) {
+    private synchronized void fetchRoleInfo(String serviceId) {
         roleInfoRepositoryList.forEach(repository->{
             ConcurrentHashMap roleInfoMap = repository.fetchRoleInfoMap(serviceId);
             if(Objects.nonNull(roleInfoMap)){
