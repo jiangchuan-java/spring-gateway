@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * todo 这里应解耦，参考路由定义与注册中心
+ *
  * @Des: breaker breaker配置中心
  * @Author: jiangchuan
  * <p>
@@ -53,9 +54,8 @@ public class ApolloBreakerConfigRepository {
         apolloConfig = ConfigService.getConfig(namespace);
         Set<String> serviceIdSet = apolloConfig.getPropertyNames();
         for (String serviceId : serviceIdSet) {
-            String routeDefinitionValue = apolloConfig.getProperty(serviceId, null);
-            ApolloBreakerModel breakerModel = JackSonUtils.json2Bean(routeDefinitionValue, ApolloBreakerModel.class);
-            CircuitBreaker breaker = buildCircuitBreaker(breakerModel);
+            String config = apolloConfig.getProperty(serviceId, null);
+            CircuitBreaker breaker = buildCircuitBreaker(serviceId, config);
             if (Objects.nonNull(breaker)) {
                 breakerCache.put(serviceId, breaker);
                 noticeBreakerFilterUpdate(serviceId, breaker);
@@ -66,17 +66,20 @@ public class ApolloBreakerConfigRepository {
 
     /**
      * 更新breaker配置
-     * @param breakerModel
+     *
+     * @param config
      */
-    private void updateRepository(ApolloBreakerModel breakerModel){
-        String serviceId = breakerModel.getServiceId();
-        CircuitBreaker breaker = buildCircuitBreaker(breakerModel);
-        breakerCache.put(serviceId, breaker);
-        noticeBreakerFilterUpdate(serviceId, breaker);
+    private void updateRepository(String serviceId, String config) {
+        CircuitBreaker breaker = buildCircuitBreaker(serviceId, config);
+        if (Objects.nonNull(breaker)) {
+            breakerCache.put(serviceId, breaker);
+            noticeBreakerFilterUpdate(serviceId, breaker);
+        }
     }
 
     /**
      * 更新filter中目前使用的filter
+     *
      * @param serviceId
      * @param breaker
      */
@@ -86,28 +89,33 @@ public class ApolloBreakerConfigRepository {
 
     /**
      * 为每个route构建独立的熔断器
+     *
      * @param
      * @return
      */
-    private CircuitBreaker buildCircuitBreaker(ApolloBreakerModel breakerModel) {
-        String serviceId = breakerModel.getServiceId();
-        CircuitBreakerConfig.Builder builder = CircuitBreakerConfig.custom();
-        if (Objects.equals(breakerModel.getSlidingWindowType(), SLIDING_WINDOW_TYPE_TIME)) {
-            builder = builder.slidingWindowType(CircuitBreakerConfig.SlidingWindowType.TIME_BASED);
-        } else {
-            builder = builder.slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED);
+    private CircuitBreaker buildCircuitBreaker(String serviceId, String config) {
+        try {
+            ApolloBreakerModel breakerModel = JackSonUtils.json2Bean(config, ApolloBreakerModel.class);
+            CircuitBreakerConfig.Builder builder = CircuitBreakerConfig.custom();
+            if (Objects.equals(breakerModel.getSlidingWindowType(), SLIDING_WINDOW_TYPE_TIME)) {
+                builder = builder.slidingWindowType(CircuitBreakerConfig.SlidingWindowType.TIME_BASED);
+            } else {
+                builder = builder.slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED);
+            }
+            builder = builder.minimumNumberOfCalls(breakerModel.minimumNumberOfCalls);
+            builder = builder.failureRateThreshold(breakerModel.failureRateThreshold);
+            builder = builder.waitDurationInOpenState(Duration.ofSeconds(breakerModel.waitDurationInOpenState));
+            builder = builder.permittedNumberOfCallsInHalfOpenState(breakerModel.permittedNumberOfCallsInHalfOpenState);
+            CircuitBreakerConfig breakerConfig = builder.build();
+            CircuitBreaker breaker = CircuitBreakerRegistry.of(breakerConfig).circuitBreaker(serviceId);
+            LOGGER.info("build new breaker {} : {}", serviceId, breaker);
+
+            return breaker;
+        } catch (Exception e) {
+            LOGGER.error("serviceId : {}, config : {} build error: {}", e);
         }
-        builder = builder.minimumNumberOfCalls(breakerModel.minimumNumberOfCalls);
-        builder = builder.failureRateThreshold(breakerModel.failureRateThreshold);
-        builder = builder.waitDurationInOpenState(Duration.ofSeconds(breakerModel.waitDurationInOpenState));
-        builder = builder.permittedNumberOfCallsInHalfOpenState(breakerModel.permittedNumberOfCallsInHalfOpenState);
-        CircuitBreakerConfig breakerConfig = builder.build();
-        CircuitBreaker breaker = CircuitBreakerRegistry.of(breakerConfig).circuitBreaker(breakerModel.getServiceId());
+        return null;
 
-
-        LOGGER.info("build new breaker {} : {}", serviceId, breaker);
-
-        return breaker;
     }
 
 
@@ -116,15 +124,14 @@ public class ApolloBreakerConfigRepository {
         @Override
         public void onChange(ConfigChangeEvent changeEvent) {
             try {
-                for (String serverName : changeEvent.changedKeys()) {
-                    String newValue = changeEvent.getChange(serverName).getNewValue();
-                    String oldValue = changeEvent.getChange(serverName).getOldValue();
+                for (String serviceId : changeEvent.changedKeys()) {
+                    String newValue = changeEvent.getChange(serviceId).getNewValue();
+                    String oldValue = changeEvent.getChange(serviceId).getOldValue();
 
                     LOGGER.info("BreakerConfigChangeListener, serverId : {} changed, oldValue: {}, newValue: {}"
-                            , serverName, oldValue, newValue);
-                    ApolloBreakerModel newConfig = JackSonUtils.json2Bean(newValue, ApolloBreakerModel.class);
+                            , serviceId, oldValue, newValue);
 
-                    updateRepository(newConfig);
+                    updateRepository(serviceId, newValue);
 
                 }
             } catch (Exception e) {
@@ -134,9 +141,6 @@ public class ApolloBreakerConfigRepository {
     }
 
     private static class ApolloBreakerModel {
-
-        //业务id
-        private String serviceId;
         //time or count
         private String slidingWindowType;
         //多少次一个统计周期,如果是时间类型的：单位就是秒*/
@@ -149,14 +153,6 @@ public class ApolloBreakerConfigRepository {
         private int waitDurationInOpenState;
         //打开状态下，尝试多少次请求
         private int permittedNumberOfCallsInHalfOpenState;
-
-        public String getServiceId() {
-            return serviceId;
-        }
-
-        public void setServiceId(String serviceId) {
-            this.serviceId = serviceId;
-        }
 
         public String getSlidingWindowType() {
             return slidingWindowType;

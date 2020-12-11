@@ -1,5 +1,6 @@
 package com.ifeng.fhh.gateway.route;
 
+import com.ifeng.fhh.gateway.discovery.RefreshInstancesEvent;
 import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionRepository;
@@ -23,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class AbstractRouteDefinitionRepository implements RouteDefinitionRepository, ApplicationEventPublisherAware {
 
+    //不用子类用什么存储，这里就是要根据id获取路由定义
     private ConcurrentHashMap<String/*serviceId*/, RouteDefinition/*路由定义*/> routeDefinitionCache = new ConcurrentHashMap<>();
 
     private ApplicationEventPublisher applicationEventPublisher;

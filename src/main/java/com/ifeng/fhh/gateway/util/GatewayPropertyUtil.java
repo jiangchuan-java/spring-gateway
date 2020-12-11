@@ -9,4 +9,6 @@ package com.ifeng.fhh.gateway.util;
 public class GatewayPropertyUtil {
 
     public static final String SERVER_ID = "serverId";
+
+    public static final String AUTHORITY_MANAGEMENT_SYSTEM_TOKEN = "Authorization";
 }

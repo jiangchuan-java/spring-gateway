@@ -6,6 +6,8 @@ nacos:
   namespace:
     gateway: @nacos.namespace.gateway@
 
+authority_management_system_url: @authorization.url@
+
 app:
   id: @app.id@
 apollo:
@@ -13,6 +15,7 @@ apollo:
   namespace:
     route-definition: @apollo.namespace.route-definition@
     breaker-config: @apollo.namespace.breaker-config@
+    uri-role: @apollo.namespace.uri-role@
 
 management:
   endpoint:

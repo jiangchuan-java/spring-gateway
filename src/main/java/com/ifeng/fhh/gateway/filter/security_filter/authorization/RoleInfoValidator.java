@@ -1,7 +1,8 @@
-package com.ifeng.fhh.gateway.filter.authority_filter.authority;
+package com.ifeng.fhh.gateway.filter.security_filter.authorization;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.ifeng.fhh.gateway.util.GatewayPropertyUtil;
 import com.ifeng.fhh.gateway.util.httpclient.HttpClientTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,19 +21,19 @@ import java.util.Objects;
  * @Date: 20-11-5
  */
 @Component
-public class AuthorityValidator {
+public class RoleInfoValidator {
 
     @Autowired
-    private AbstractUriAuthorityRepository authorityRepository;
+    private CompositeRoleInfoRepository repository;
 
     @Autowired
     private HttpClientTemplate httpClientTemplate;
 
-    @Value("null")
-    private String authorUrl;
+    @Value("${authority_management_system_url}")
+    private String authority_management_system_url;
 
-    public Mono<Boolean> validate(String serverId, String path, String token){
-        String roleId = authorityRepository.matchRoleId(serverId, path);
+    public Mono<Boolean> validate(String serverId, String uri, String token){
+        String roleId = repository.matchRoleId(serverId, uri);
         if(Objects.isNull(roleId)){
             return Mono.just(true);
         } else {
@@ -46,8 +47,8 @@ public class AuthorityValidator {
         }
         Map<String, String> headers = new HashMap<>();
         headers = new HashMap<>();
-        headers.put("Authorization", token);
-        return httpClientTemplate.get(authorUrl, headers, 2000,500,500)
+        headers.put(GatewayPropertyUtil.AUTHORITY_MANAGEMENT_SYSTEM_TOKEN, token);
+        return httpClientTemplate.get(authority_management_system_url, headers, 2000,500,500)
                 .map(resp -> checkRole(resp, roleId));
     }
 
@@ -65,11 +66,27 @@ public class AuthorityValidator {
         return false;
     }
 
-    public AbstractUriAuthorityRepository getAuthorityRepository() {
-        return authorityRepository;
+    public CompositeRoleInfoRepository getRepository() {
+        return repository;
     }
 
-    public void setAuthorityRepository(AbstractUriAuthorityRepository authorityRepository) {
-        this.authorityRepository = authorityRepository;
+    public void setRepository(CompositeRoleInfoRepository repository) {
+        this.repository = repository;
+    }
+
+    public HttpClientTemplate getHttpClientTemplate() {
+        return httpClientTemplate;
+    }
+
+    public void setHttpClientTemplate(HttpClientTemplate httpClientTemplate) {
+        this.httpClientTemplate = httpClientTemplate;
+    }
+
+    public String getAuthority_management_system_url() {
+        return authority_management_system_url;
+    }
+
+    public void setAuthority_management_system_url(String authority_management_system_url) {
+        this.authority_management_system_url = authority_management_system_url;
     }
 }

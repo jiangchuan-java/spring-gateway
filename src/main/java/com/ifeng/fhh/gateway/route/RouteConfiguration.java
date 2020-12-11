@@ -26,7 +26,7 @@ public class RouteConfiguration {
         return builder.routes()
                 // Add a simple re-route from: /get to: http://httpbin.org:80
                 // Add a simple "Hello:World" HTTP Header
-                .route(r-> r.path("/test/**")
+                .route("fhh-service",r-> r.path("/fhh-service/**")
                         .uri("http://www.baidu.com").metadata(RESPONSE_TIMEOUT_ATTR,100).metadata(CONNECT_TIMEOUT_ATTR,100)) // forward to httpbin
                 .build();
     }

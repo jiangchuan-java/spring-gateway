@@ -1,8 +1,9 @@
-package com.ifeng.fhh.gateway.route;
+package com.ifeng.fhh.gateway.discovery;
 
 import org.springframework.context.ApplicationEvent;
 
 /**
+ * 当有实例发生变更时，主动发布此事件，由事件监听者统一处理
  * @Author: jiangchuan
  * <p>
  * @Date: 20-12-10

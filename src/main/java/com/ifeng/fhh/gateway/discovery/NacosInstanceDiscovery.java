@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -54,13 +55,8 @@ public class NacosInstanceDiscovery extends AbstractInstanceDiscovery {
         }
     }
 
-    /**
-     * 初始化实例缓存
-     *
-     * @param host
-     */
     @Override
-    public List<ServiceInstance> doRefresh(String host) {
+    protected List<ServiceInstance> fetchServiceList(String host) {
         try {
             List<ServiceInstance> serverInstanceList = new ArrayList<>();
             List<Instance> nacosInstanceList = namingService.selectInstances(host, true);
@@ -86,24 +82,19 @@ public class NacosInstanceDiscovery extends AbstractInstanceDiscovery {
     }
 
 
-
-
     /**
      * nacos 的配置变更监听
      */
     private class NacosEventListener implements EventListener {
-        private String serviceName;
-        public NacosEventListener(String serviceName) {
-            this.serviceName = serviceName;
+        private String host;
+        public NacosEventListener(String host) {
+            this.host = host;
         }
         @Override
         public void onEvent(Event event) {
             if (event instanceof NamingEvent) {
-                List<Instance> nacosInstanceList = ((NamingEvent) event).getInstances();
-                List<ServiceInstance> serviceInstanceList = transferTo(nacosInstanceList);
-                //DEFAULT_GROUP@@fhh-api
-                internalRefresh(serviceName, serviceInstanceList);
-                LOGGER.info("********** {} nacos update : {}", serviceName, serviceInstanceList.size());
+                publishRefreshInstanceEvent(host);
+                LOGGER.info("********** nacos update : {}", host);
             }
         }
     }

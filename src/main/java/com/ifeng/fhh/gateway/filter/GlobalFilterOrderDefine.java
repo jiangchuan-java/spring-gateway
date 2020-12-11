@@ -3,6 +3,7 @@ package com.ifeng.fhh.gateway.filter;
 import com.ifeng.fhh.gateway.filter.breaker_filter.BreakerGlobalGatewayFilter;
 import com.ifeng.fhh.gateway.filter.loadbalance_filter.LoadbalanceGlobalGatewayFilter;
 import com.ifeng.fhh.gateway.filter.monitor_filter.MonitorGlobalGatewayFilter;
+import com.ifeng.fhh.gateway.filter.security_filter.TokenValidateGlobalGatewayFilter;
 import com.ifeng.fhh.gateway.filter.stripPrefix_filter.ServerIdExtractGlobalGatewayFilter;
 
 /**
@@ -20,6 +21,8 @@ public enum GlobalFilterOrderDefine {
     STRIPPREFIX_GLOBAL_GATEWAYFILTER(ServerIdExtractGlobalGatewayFilter.class, 2),
     //熔断器filter
     BREAKER_GLOBAL_GATEWAYFILTER(BreakerGlobalGatewayFilter.class, 3),
+    //安全校验filter
+    SECURITY_GLOBAL_GATEWAYFILTER(TokenValidateGlobalGatewayFilter.class, 4),
     //自定义负载均衡filter
     LOADBALANCE_GLOBAL_GATEWAYFILTER(LoadbalanceGlobalGatewayFilter.class, (10150 - 1)/*10150是gateway自带lb的filer*/);
 

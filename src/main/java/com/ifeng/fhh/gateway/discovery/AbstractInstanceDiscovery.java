@@ -1,48 +1,37 @@
 package com.ifeng.fhh.gateway.discovery;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
- * @Des: 注册中心解耦层，使业务与具体注册中心实现解耦
+ * @Des: 抽象层，与具体实现解耦
  * @Author: jiangchuan
  * <p>
  * @Date: 20-11-5
  */
-public abstract class AbstractInstanceDiscovery {
+public abstract class AbstractInstanceDiscovery implements ApplicationEventPublisherAware {
 
+    private ApplicationEventPublisher publisher;
+
+    //不用子类用什么注册中心，这里就是要根据域名获取实例
     private ConcurrentHashMap<String/*host 域名*/, List<ServiceInstance>/*可用实例实例*/> serverInstanceCache = new ConcurrentHashMap<>();
-    /**
-     * 外部刷新
-     * @param host 域名
-     */
-    public void refreshInstanceCache(String host) {
-        List<ServiceInstance> serviceInstances = doRefresh(host);
-        serverInstanceCache.put(host, serviceInstances);
+
+
+    public void publishRefreshInstanceEvent(String host){
+        publisher.publishEvent(new RefreshInstancesEvent(this, host));
     }
 
-    /**
-     * 内部刷新
-     * @param host
-     * @param list
-     */
-    protected final void internalRefresh(String host, List<ServiceInstance> list) {
-        serverInstanceCache.put(host, list);
+    @Override
+    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        this.publisher = applicationEventPublisher;
     }
 
-    protected abstract List<ServiceInstance> doRefresh(String host);
+    protected abstract List<ServiceInstance> fetchServiceList(String host);
 
-    /**
-     * 获取实例
-     * @param host
-     * @return
-     */
-    public List<ServiceInstance> getCurrentServiceInstances(String host) {
-        List<ServiceInstance> serverInstanceList = serverInstanceCache.get(host);
-        return serverInstanceList;
-    }
 
 }
