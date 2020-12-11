@@ -64,6 +64,7 @@ public class CompositeInstanceDiscovery implements ApplicationContextAware, Appl
                     instanceList = new LinkedList<>();
                 }
                 instanceList.addAll(instanceList);
+                serverInstanceCache.put(host, instanceList);
             }
             LOGGER.info("********** fetchServiceList host : {}, size : {}", host, newInstanceList.size());
         });
