@@ -83,7 +83,7 @@ public class RoleInfoValidator {
         try {
             breaker.acquirePermission();
         } catch (CallNotPermittedException e) {
-            LOGGER.warn("********** checkToken 熔断!!!!!");
+            LOGGER.warn("********** checkToken break!!!!!");
             return Mono.error(new ServiceUnavailableException());
         }
 
