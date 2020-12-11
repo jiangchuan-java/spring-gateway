@@ -63,9 +63,9 @@ public class CompositeInstanceDiscovery implements ApplicationContextAware, Appl
                 if(CollectionUtils.isEmpty(instanceList)){
                     instanceList = new LinkedList<>();
                 }
-                LOGGER.info("********** fetchServiceList host : {}, size : {}", host, instanceList.size());
                 instanceList.addAll(instanceList);
             }
+            LOGGER.info("********** fetchServiceList host : {}, size : {}", host, newInstanceList.size());
         });
     }
 
@@ -79,8 +79,8 @@ public class CompositeInstanceDiscovery implements ApplicationContextAware, Appl
     public void onApplicationEvent(RefreshInstancesEvent event) {
         RefreshInstancesEvent refreshInstancesEvent = (RefreshInstancesEvent) event;
         String host = refreshInstancesEvent.getHost();
-        fetchServiceList(host);
         LOGGER.info("********** Listen RefreshInstancesEvent host : {}", host);
+        fetchServiceList(host);
     }
 
 
