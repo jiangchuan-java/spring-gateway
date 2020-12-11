@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -20,16 +19,14 @@ public abstract class AbstractRoleInfoRepository {
     private ConcurrentHashMap<String/*serviceId*/, ConcurrentHashMap<String/*uri*/, String>/*roleId*/> roleInfoCache = new ConcurrentHashMap<>();
 
     public String matchRoleId(String serviceId, String uri) {
+        String roleId = null;
         if(!roleInfoCache.containsKey(serviceId)){
             return null;
         } else {
             ConcurrentHashMap<String, String> uriMap = roleInfoCache.get(serviceId);
-            String roleId = uriMap.get(uri);
-            if(Objects.nonNull(roleId)){
-                LOGGER.info("********** matchRoleId, serverId : {}, uri : {}, roleId : {}", serviceId, uri, roleId);
-                return roleId;
-            }
+            roleId = uriMap.get(uri);
         }
+        LOGGER.info("********** matchRoleId, serverId : {}, uri : {}, roleId : {}", serviceId, uri, roleId);
         return null;
     }
 
