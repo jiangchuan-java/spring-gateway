@@ -103,8 +103,8 @@ public class NacosInstanceDiscovery extends AbstractInstanceDiscovery {
                 List<Instance> nacosInstanceList = ((NamingEvent) event).getInstances();
                 List<ServiceInstance> serviceInstanceList = transferTo(nacosInstanceList);
                 //DEFAULT_GROUP@@fhh-api
-                internalRefresh(serviceName, serviceInstanceList);
                 LOGGER.info("********** {} nacos update : {}", serviceName, serviceInstanceList.size());
+                internalRefresh(serviceName, serviceInstanceList);
             }
         }
     }
