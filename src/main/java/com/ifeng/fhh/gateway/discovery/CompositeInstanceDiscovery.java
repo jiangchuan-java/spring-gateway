@@ -59,15 +59,15 @@ public class CompositeInstanceDiscovery implements ApplicationContextAware, Appl
      */
     private synchronized void fetchServiceList(String host) {
         discoveryList.forEach(discovery -> {
+            List<ServiceInstance> instanceList = serverInstanceCache.get(host);
             List<ServiceInstance> newInstanceList = discovery.fetchServiceList(host);
             if(!CollectionUtils.isEmpty(newInstanceList)){
-                List<ServiceInstance> instanceList = serverInstanceCache.get(host);
                 if(CollectionUtils.isEmpty(instanceList)){
                     instanceList = new LinkedList<>();
                 }
-                instanceList.addAll(instanceList);
-                serverInstanceCache.put(host, instanceList);
+                instanceList.addAll(newInstanceList);
             }
+            serverInstanceCache.put(host, instanceList);
             LOGGER.info("********** fetchServiceList host : {}, size : {}", host, newInstanceList.size());
         });
     }
