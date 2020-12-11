@@ -61,7 +61,7 @@ public class NacosInstanceDiscovery extends AbstractInstanceDiscovery {
             List<ServiceInstance> serverInstanceList = new ArrayList<>();
             List<Instance> nacosInstanceList = namingService.selectInstances(host, true);
             serverInstanceList = transferTo(nacosInstanceList);
-            LOGGER.info("********** init host: {} server instatnces : {}", host, serverInstanceList.size());
+            LOGGER.info("********** select instances host: {} server instatnces : {}", host, serverInstanceList.size());
             if(subscribeList.contains(host)){
                 return serverInstanceList;
             }

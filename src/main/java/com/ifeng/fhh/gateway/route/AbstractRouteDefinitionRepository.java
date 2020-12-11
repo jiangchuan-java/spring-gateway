@@ -1,6 +1,9 @@
 package com.ifeng.fhh.gateway.route;
 
 import com.ifeng.fhh.gateway.discovery.RefreshInstancesEvent;
+import com.ifeng.fhh.gateway.filter.security_filter.authorization.CompositeRoleInfoRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionRepository;
@@ -23,6 +26,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Date: 20-12-10
  */
 public class AbstractRouteDefinitionRepository implements RouteDefinitionRepository, ApplicationEventPublisherAware {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRouteDefinitionRepository.class);
 
     //不用子类用什么存储，这里就是要根据id获取路由定义
     private ConcurrentHashMap<String/*serviceId*/, RouteDefinition/*路由定义*/> routeDefinitionCache = new ConcurrentHashMap<>();
@@ -50,6 +55,7 @@ public class AbstractRouteDefinitionRepository implements RouteDefinitionReposit
 
     private void publishInstanceRefreshEvent(RouteDefinition routeDefinition) {
         String host = routeDefinition.getUri().getHost();
+        LOGGER.info("********** publishInstanceRefreshEvent host : {}", host);
         applicationEventPublisher.publishEvent(new RefreshInstancesEvent(this,host));
     }
 
@@ -59,6 +65,7 @@ public class AbstractRouteDefinitionRepository implements RouteDefinitionReposit
      * 2：CompositeInstanceDiscovery -> 监听路由变更后，同时去刷新注册中心，目的是根据最新路由定义获取实例列表
      */
     private void publishRouteDefinitonRefreshEvent() {
+        LOGGER.info("********** publishRouteDefinitonRefreshEvent");
         applicationEventPublisher.publishEvent(new RefreshRoutesEvent(this));
     }
 
