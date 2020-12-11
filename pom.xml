@@ -166,7 +166,7 @@
                 <apollo.namespace.breaker-config>breaker-config</apollo.namespace.breaker-config>
                 <apollo.namespace.uri-role>uri-role</apollo.namespace.uri-role>
                 <!--apollo config-->
-                <authorization.url>https://test0.auth-server.cpdt.ifengidc.com/a/userRole</authorization.url>
+                <authorization.url>https://test1.auth-server.cpdt.ifengidc.com/userRole</authorization.url>
             </properties>
         </profile>
 
