@@ -60,6 +60,7 @@ public class RoleInfoValidator {
 
     public Mono<Boolean> validate(String serverId, String uri, String token) {
         String roleId = repository.matchRoleId(serverId, uri);
+        LOGGER.info("********** validate serverId : {}, uri : {}, roleId : {}", serverId, uri, roleId);
         if (Objects.isNull(roleId)) {
             return Mono.just(true);
         } else {
@@ -68,6 +69,7 @@ public class RoleInfoValidator {
     }
 
     private Mono<Boolean> checkToken(String token, String roleId) {
+        LOGGER.info("********** checkToken token: {}, roleId : {}", token, roleId);
         if (Objects.isNull(token)) {
             return Mono.just(false);
         }
@@ -95,6 +97,7 @@ public class RoleInfoValidator {
     }
 
     private boolean checkRole(String resp, String roleId) {
+        LOGGER.info("********** checkRole resp: {}, roleId : {}", resp, roleId);
         JSONObject jsonObject = JSON.parseObject(resp);
         JSONObject dataJson = jsonObject.getJSONObject("data");
         if (dataJson.containsKey("role")) {
