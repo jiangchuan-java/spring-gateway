@@ -45,8 +45,8 @@ public class RoleInfoValidator {
 
     private static final CircuitBreakerConfig defaultBreakerConfig = CircuitBreakerConfig.custom()
             .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED) /*固定大小，不做限流就简单点*/
-            .slidingWindowSize(10) /*每100次计算一次,如果是时间类型的：单位就是秒*/
-            .minimumNumberOfCalls(10) /*最少调用100次才能进行统计*/
+            .slidingWindowSize(100) /*每100次计算一次,如果是时间类型的：单位就是秒*/
+            .minimumNumberOfCalls(100) /*最少调用100次才能进行统计*/
             .failureRateThreshold(80) /*80%失败率*/
             .waitDurationInOpenState(Duration.ofSeconds(30)) /*维持熔断状态30秒*/
             .permittedNumberOfCallsInHalfOpenState(20) /*半打开状态下，尝试多少次请求*/
@@ -84,7 +84,7 @@ public class RoleInfoValidator {
             breaker.acquirePermission();
         } catch (CallNotPermittedException e) {
             LOGGER.warn("********** checkToken break!!!!!");
-            return Mono.error(new ServiceUnavailableException());
+            return Mono.just(false);
         }
 
         return httpClientTemplate.get(authority_management_system_url, headers, 2000, 500, 500)
