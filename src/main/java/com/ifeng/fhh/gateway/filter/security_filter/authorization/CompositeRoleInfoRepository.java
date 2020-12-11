@@ -13,34 +13,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 将所有的权限配置聚合在一个类中，由此类统一提供服务
- *
+ * 将所有的权限仓库聚合在一个类中，由此类统一提供服务
+ * 仅聚合仓库，便于管理
  * @Author: jiangchuan
  * <p>
  * @Date: 20-12-11
  */
 @Component
-public class CompositeRoleInfoRepository implements ApplicationContextAware, ApplicationListener<RefreshRoleInfoEvent> {
+public class CompositeRoleInfoRepository implements ApplicationContextAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CompositeRoleInfoRepository.class);
 
     private ApplicationContext applicationContext;
 
-    private ConcurrentHashMap<String/*serviceId*/, ConcurrentHashMap<String/*uri*/, String>/*roleId*/> roleInfoCache = new ConcurrentHashMap<>();
 
     private List<AbstractRoleInfoRepository> roleInfoRepositoryList = new ArrayList<>();
 
     public String matchRoleId(String serviceId, String uri) {
-        if(!roleInfoCache.containsKey(serviceId)){
-            return null;
-        } else {
-            ConcurrentHashMap<String, String> uriMap = roleInfoCache.get(serviceId);
-            String roleId = uriMap.get(uri);
+        for(AbstractRoleInfoRepository repository : roleInfoRepositoryList) {
+            String roleId = repository.matchRoleId(serviceId, uri);
             if(Objects.nonNull(roleId)){
-                LOGGER.info("********** matchRoleId, serverId : {}, uri : {}, roleId : {}", serviceId, uri, roleId);
                 return roleId;
             }
         }
@@ -55,23 +49,6 @@ public class CompositeRoleInfoRepository implements ApplicationContextAware, App
         for(AbstractRoleInfoRepository roleInfoRepository : beansOfType.values()){
             roleInfoRepositoryList.add(roleInfoRepository);
         }
-    }
-
-    private synchronized void fetchRoleInfo(String serviceId) {
-        roleInfoRepositoryList.forEach(repository->{
-            ConcurrentHashMap roleInfoMap = repository.fetchRoleInfoMap(serviceId);
-            if(Objects.nonNull(roleInfoMap)){
-                roleInfoCache.put(serviceId, roleInfoMap);
-                LOGGER.info("*********** update cache serviceId : {}, infoMap : {}", serviceId, roleInfoMap.toString());
-            }
-        });
-    }
-
-    @Override
-    public void onApplicationEvent(RefreshRoleInfoEvent event) {
-        String serviceId = event.getServiceId();
-        fetchRoleInfo(serviceId);
-        LOGGER.info("*********** RefreshRoleInfoEvent serviceId : {}", serviceId);
     }
 
     @Override

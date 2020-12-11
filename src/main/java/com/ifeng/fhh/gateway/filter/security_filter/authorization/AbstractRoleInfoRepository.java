@@ -1,9 +1,11 @@
 package com.ifeng.fhh.gateway.filter.security_filter.authorization;
 
 
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -11,19 +13,34 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>
  * @Date: 20-11-5
  */
-public abstract class AbstractRoleInfoRepository implements ApplicationEventPublisherAware {
+public abstract class AbstractRoleInfoRepository {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRoleInfoRepository.class);
 
-    private ApplicationEventPublisher publisher;
+    private ConcurrentHashMap<String/*serviceId*/, ConcurrentHashMap<String/*uri*/, String>/*roleId*/> roleInfoCache = new ConcurrentHashMap<>();
 
-    protected abstract ConcurrentHashMap<String, String> fetchRoleInfoMap(String serviceId);
-
-    public void publishRefreshRoleInfoEvent(String serviceId){
-        publisher.publishEvent(new RefreshRoleInfoEvent(this, serviceId));
+    public String matchRoleId(String serviceId, String uri) {
+        if(!roleInfoCache.containsKey(serviceId)){
+            return null;
+        } else {
+            ConcurrentHashMap<String, String> uriMap = roleInfoCache.get(serviceId);
+            String roleId = uriMap.get(uri);
+            if(Objects.nonNull(roleId)){
+                LOGGER.info("********** matchRoleId, serverId : {}, uri : {}, roleId : {}", serviceId, uri, roleId);
+                return roleId;
+            }
+        }
+        return null;
     }
 
-    @Override
-    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-        this.publisher = applicationEventPublisher;
+    /**
+     * 内部刷新
+     * @param serviceId
+     * @param roleInfoMap
+     */
+    protected final void internalRefresh(String serviceId, ConcurrentHashMap<String, String> roleInfoMap) {
+        if(!CollectionUtils.isEmpty(roleInfoMap)){
+            roleInfoCache.put(serviceId, roleInfoMap);
+        }
     }
 }

@@ -14,7 +14,6 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @Des: 动态权限仓库
- * 不用了，网关还是做全局的事情吧，具体业务的权限控制，还是让业务本身去处理吧
  * @Author: jiangchuan
  * <p>
  * @Date: 20-11-3
@@ -33,8 +31,6 @@ public class ApolloRoleInfoRepository extends AbstractRoleInfoRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApolloRoleInfoRepository.class);
 
     private Config apolloConfig;
-
-    private ConcurrentHashMap<String/*serviceId*/, ConcurrentHashMap<String/*uri*/, String>/*roleId*/> roleInfoCache = new ConcurrentHashMap<>();
 
     @Value("${apollo.namespace.uri-role}")
     private String namespace;
@@ -54,10 +50,7 @@ public class ApolloRoleInfoRepository extends AbstractRoleInfoRepository {
         try {
             ApolloUriRoleModel apolloRouteModel = JackSonUtils.json2Bean(config, ApolloUriRoleModel.class);
 
-            ConcurrentHashMap<String, String> uriMap = roleInfoCache.get(serviceId);
-            if(Objects.isNull(uriMap)){
-                uriMap = new ConcurrentHashMap<>();
-            }
+            ConcurrentHashMap<String, String> uriMap = null;
             List<ApolloUriRoleModel.UriRoleConfig> authorityConfigList = apolloRouteModel.getRoleConfig();
             Iterator<ApolloUriRoleModel.UriRoleConfig> iterator = authorityConfigList.iterator();
             while (iterator.hasNext()) {
@@ -67,17 +60,10 @@ public class ApolloRoleInfoRepository extends AbstractRoleInfoRepository {
                 uriMap.put(uri, roleId);
                 LOGGER.info("********** new uri role, serverId : {}, uri : {}, roleId : {}", serviceId, uri, roleId);
             }
-            roleInfoCache.put(serviceId, uriMap);
-            super.publishRefreshRoleInfoEvent(serviceId);
+            super.internalRefresh(serviceId, uriMap);
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-
-    @Override
-    protected ConcurrentHashMap<String, String> fetchRoleInfoMap(String serviceId) {
-        return roleInfoCache.get(serviceId);
     }
 
     private class UriRoleChangeListener implements ConfigChangeListener {
