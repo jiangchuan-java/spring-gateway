@@ -27,7 +27,7 @@ public abstract class AbstractRoleInfoRepository {
             roleId = uriMap.get(uri);
         }
         LOGGER.info("********** matchRoleId, serverId : {}, uri : {}, roleId : {}", serviceId, uri, roleId);
-        return null;
+        return roleId;
     }
 
     /**
