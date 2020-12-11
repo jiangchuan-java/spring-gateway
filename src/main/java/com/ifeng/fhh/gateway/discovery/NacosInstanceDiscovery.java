@@ -55,13 +55,18 @@ public class NacosInstanceDiscovery extends AbstractInstanceDiscovery {
         }
     }
 
+    /**
+     * 初始化实例缓存
+     *
+     * @param host
+     */
     @Override
-    protected List<ServiceInstance> fetchServiceList(String host) {
+    public List<ServiceInstance> doRefresh(String host) {
         try {
             List<ServiceInstance> serverInstanceList = new ArrayList<>();
             List<Instance> nacosInstanceList = namingService.selectInstances(host, true);
             serverInstanceList = transferTo(nacosInstanceList);
-            LOGGER.info("********** select instances host: {} server instatnces : {}", host, serverInstanceList.size());
+            LOGGER.info("********** init host: {} server instatnces : {}", host, serverInstanceList.size());
             if(subscribeList.contains(host)){
                 return serverInstanceList;
             }
@@ -82,19 +87,24 @@ public class NacosInstanceDiscovery extends AbstractInstanceDiscovery {
     }
 
 
+
+
     /**
      * nacos 的配置变更监听
      */
     private class NacosEventListener implements EventListener {
-        private String host;
-        public NacosEventListener(String host) {
-            this.host = host;
+        private String serviceName;
+        public NacosEventListener(String serviceName) {
+            this.serviceName = serviceName;
         }
         @Override
         public void onEvent(Event event) {
             if (event instanceof NamingEvent) {
-                publishRefreshInstanceEvent(host);
-                LOGGER.info("********** nacos update : {}", host);
+                List<Instance> nacosInstanceList = ((NamingEvent) event).getInstances();
+                List<ServiceInstance> serviceInstanceList = transferTo(nacosInstanceList);
+                //DEFAULT_GROUP@@fhh-api
+                internalRefresh(serviceName, serviceInstanceList);
+                LOGGER.info("********** {} nacos update : {}", serviceName, serviceInstanceList.size());
             }
         }
     }

@@ -1,8 +1,7 @@
 package com.ifeng.fhh.gateway.discovery;
 
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,24 +13,42 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>
  * @Date: 20-11-5
  */
-public abstract class AbstractInstanceDiscovery implements ApplicationEventPublisherAware {
-
-    private ApplicationEventPublisher publisher;
+public abstract class AbstractInstanceDiscovery{
 
     //不用子类用什么注册中心，这里就是要根据域名获取实例
     private ConcurrentHashMap<String/*host 域名*/, List<ServiceInstance>/*可用实例实例*/> serverInstanceCache = new ConcurrentHashMap<>();
-
-
-    public void publishRefreshInstanceEvent(String host){
-        publisher.publishEvent(new RefreshInstancesEvent(this, host));
+    /**
+     * 外部刷新
+     * @param host 域名
+     */
+    public void refreshInstanceCache(String host) {
+        List<ServiceInstance> serviceInstances = doRefresh(host);
+        if(!CollectionUtils.isEmpty(serviceInstances)){
+            serverInstanceCache.put(host, serviceInstances);
+        }
     }
 
-    @Override
-    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-        this.publisher = applicationEventPublisher;
+    /**
+     * 内部刷新
+     * @param host
+     * @param list
+     */
+    protected final void internalRefresh(String host, List<ServiceInstance> list) {
+        if(!CollectionUtils.isEmpty(list)){
+            serverInstanceCache.put(host, list);
+        }
     }
 
-    protected abstract List<ServiceInstance> fetchServiceList(String host);
+    protected abstract List<ServiceInstance> doRefresh(String host);
 
+    /**
+     * 获取实例
+     * @param host
+     * @return
+     */
+    public List<ServiceInstance> getCurrentServiceInstances(String host) {
+        List<ServiceInstance> serverInstanceList = serverInstanceCache.get(host);
+        return serverInstanceList;
+    }
 
 }
