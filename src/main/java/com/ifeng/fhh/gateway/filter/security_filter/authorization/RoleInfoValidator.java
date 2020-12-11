@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.ifeng.fhh.gateway.util.GatewayPropertyUtil;
 import com.ifeng.fhh.gateway.util.httpclient.HttpClientTemplate;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.gateway.support.ServiceUnavailableException;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -77,6 +79,13 @@ public class RoleInfoValidator {
         headers = new HashMap<>();
         headers.put(GatewayPropertyUtil.AUTHORITY_MANAGEMENT_SYSTEM_TOKEN, token);
         long start = System.nanoTime();
+
+        try {
+            breaker.acquirePermission();
+        } catch (CallNotPermittedException e) {
+            LOGGER.warn("checkToken 熔断!!!!!");
+            return Mono.error(new ServiceUnavailableException());
+        }
 
         return httpClientTemplate.get(authority_management_system_url, headers, 2000, 500, 500)
                 .onErrorResume(new Function<Throwable, Mono<String>>() {
