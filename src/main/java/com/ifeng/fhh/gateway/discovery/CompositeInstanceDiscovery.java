@@ -16,6 +16,8 @@ import java.util.*;
 /**
  * 聚合注册中心，使多种注册中心可以共存，且解耦
  *
+ * 这里并不将实例列表聚合在一起，是因为无法分清实例的更新是哪个抽象仓库的
+ *
  * @Author: jiangchuan
  * <p>
  * @Date: 20-12-10
@@ -42,13 +44,14 @@ public class CompositeInstanceDiscovery implements ApplicationContextAware, Appl
      * @return
      */
     public List<ServiceInstance> getCurrentServiceInstances(String host) {
-        List<ServiceInstance> serverInstanceList = null;
+        List<ServiceInstance> serverInstanceList = new ArrayList<>();
         for(AbstractInstanceDiscovery discovery : discoveryList){
             serverInstanceList = discovery.getCurrentServiceInstances(host);
             if(!CollectionUtils.isEmpty(serverInstanceList)){
                 break;
             }
         }
+        LOGGER.info("getCurrentServiceInstances host : {}, size : {}", host, serverInstanceList.size());
         return serverInstanceList;
     }
 
