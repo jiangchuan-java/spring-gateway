@@ -48,6 +48,8 @@ public class CompositeInstanceDiscovery implements ApplicationContextAware, Appl
      */
     public List<ServiceInstance> getCurrentServiceInstances(String host) {
         List<ServiceInstance> serverInstanceList = serverInstanceCache.get(host);
+        LOGGER.info("********** getCurrentServiceInstances host : {}, size : {}", host, serverInstanceList.size());
+
         return serverInstanceList;
     }
 
