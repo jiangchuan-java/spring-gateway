@@ -50,7 +50,7 @@ public class ApolloRoleInfoRepository extends AbstractRoleInfoRepository {
         try {
             ApolloUriRoleModel apolloRouteModel = JackSonUtils.json2Bean(config, ApolloUriRoleModel.class);
 
-            ConcurrentHashMap<String, String> uriMap = null;
+            ConcurrentHashMap<String, String> uriMap = new ConcurrentHashMap<>();
             List<ApolloUriRoleModel.UriRoleConfig> authorityConfigList = apolloRouteModel.getRoleConfig();
             Iterator<ApolloUriRoleModel.UriRoleConfig> iterator = authorityConfigList.iterator();
             while (iterator.hasNext()) {
