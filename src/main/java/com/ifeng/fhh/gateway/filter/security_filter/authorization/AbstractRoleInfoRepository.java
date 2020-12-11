@@ -41,6 +41,7 @@ public abstract class AbstractRoleInfoRepository {
     protected final void internalRefresh(String serviceId, ConcurrentHashMap<String, String> roleInfoMap) {
         if(!CollectionUtils.isEmpty(roleInfoMap)){
             roleInfoCache.put(serviceId, roleInfoMap);
+            LOGGER.info("********** refresh, serverId : {}, map : {}", serviceId,roleInfoMap.toString());
         }
     }
 }
