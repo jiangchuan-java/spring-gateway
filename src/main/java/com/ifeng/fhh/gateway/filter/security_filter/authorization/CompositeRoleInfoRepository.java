@@ -16,6 +16,8 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 将所有的权限配置聚合在一个类中，由此类统一提供服务
+ *
  * @Author: jiangchuan
  * <p>
  * @Date: 20-12-11
