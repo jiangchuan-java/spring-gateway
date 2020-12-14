@@ -2,7 +2,6 @@ package com.ifeng.fhh.gateway.filter.security_filter;
 
 import com.ifeng.fhh.gateway.filter.OrderedGlobalFilter;
 import com.ifeng.fhh.gateway.filter.security_filter.authorization.RoleInfoValidator;
-import com.ifeng.fhh.gateway.util.GatewayPropertyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.route.Route;
@@ -17,6 +16,7 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.s
 
 /**
  * 验证tokenFilter
+ *
  * @Author: jiangchuan
  * <p>
  * @Date: 20-12-11
@@ -37,16 +37,12 @@ public class TokenValidateGlobalGatewayFilter extends OrderedGlobalFilter {
 
         HttpHeaders headers = exchange.getRequest().getHeaders();
 
-        String token = headers.getFirst(GatewayPropertyUtil.AUTHORITY_MANAGEMENT_SYSTEM_TOKEN);
-
         String uri = exchange.getRequest().getPath().value();
 
-        return validator.validate(serviceId, uri, token).flatMap(allowed -> {
-
+        return validator.validate(serviceId, uri, headers).flatMap(allowed -> {
             if (allowed) {
                 return chain.filter(exchange);
             }
-
             setResponseStatus(exchange, statusCode);
             return exchange.getResponse().setComplete();
         });

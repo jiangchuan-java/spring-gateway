@@ -1,6 +1,7 @@
 package com.ifeng.fhh.gateway.filter.breaker_filter;
 
 import com.ifeng.fhh.gateway.filter.OrderedGlobalFilter;
+import com.ifeng.fhh.gateway.util.DefaultCircuitBreakerUtil;
 import com.ifeng.fhh.gateway.util.GatewayPropertyUtil;
 import com.ifeng.fhh.gateway.filter.loadbalance_filter.LoadbalanceGlobalGatewayFilter;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
@@ -36,16 +37,6 @@ public class BreakerGlobalGatewayFilter extends OrderedGlobalFilter {
     private ConcurrentHashMap<String/*serverId*/, CircuitBreaker/*熔断器*/> breakerMap = new ConcurrentHashMap<>();
 
 
-    private static final CircuitBreakerConfig defaultBreakerConfig = CircuitBreakerConfig.custom()
-            .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED) /*固定大小，不做限流就简单点*/
-            .slidingWindowSize(100) /*每100次计算一次,如果是时间类型的：单位就是秒*/
-            .minimumNumberOfCalls(100) /*最少调用100次才能进行统计*/
-            .failureRateThreshold(80) /*80%失败率*/
-            .waitDurationInOpenState(Duration.ofSeconds(5)) /*维持熔断状态5秒*/
-            .permittedNumberOfCallsInHalfOpenState(20) /*半打开状态下，尝试多少次请求*/
-            .build();
-
-
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
@@ -54,7 +45,7 @@ public class BreakerGlobalGatewayFilter extends OrderedGlobalFilter {
         String serverId = exchange.getAttribute(GatewayPropertyUtil.SERVER_ID);
 
         CircuitBreaker circuitBreaker = breakerMap.get(serverId);
-        if(circuitBreaker == null){
+        if (circuitBreaker == null) {
             circuitBreaker = threadSafeDefaultBreaker(serverId);
         }
 
@@ -68,36 +59,31 @@ public class BreakerGlobalGatewayFilter extends OrderedGlobalFilter {
 
         final CircuitBreaker finalBreaker = circuitBreaker; /*内部类，变量需要提前确定好*/
 
-        return chain.filter(exchange).onErrorResume(new Function<Throwable, Mono<Void>>() {
-            @Override
-            public Mono<Void> apply(Throwable throwable) {
-                long durationInNanos = System.nanoTime() - start;
-                finalBreaker.onError(durationInNanos, TimeUnit.NANOSECONDS, throwable);
-                LOGGER.error("{} filter error ",serverId, throwable);
-                return Mono.error(throwable);
-            }
-        }).doOnSuccess(new Consumer<Void>() {
-            @Override
-            public void accept(Void aVoid) {
-                long durationInNanos = System.nanoTime() - start;
-                finalBreaker.onSuccess(durationInNanos, TimeUnit.NANOSECONDS);
-            }
-        });
+        return chain.filter(exchange)
+                .onErrorResume(throwable -> {
+                    LOGGER.error("{} filter error ", serverId, throwable);
+                    long durationInNanos = System.nanoTime() - start;
+                    finalBreaker.onError(durationInNanos, TimeUnit.NANOSECONDS, throwable);
+                    return Mono.error(throwable);
+                }).doOnSuccess(Void -> {
+                    long durationInNanos = System.nanoTime() - start;
+                    finalBreaker.onSuccess(durationInNanos, TimeUnit.NANOSECONDS);
+                });
     }
 
     /**
      * 线程安全的构建单例对象
+     *
      * @param serverId
      * @return
      */
-    private CircuitBreaker threadSafeDefaultBreaker(String serverId){
+    private CircuitBreaker threadSafeDefaultBreaker(String serverId) {
         CircuitBreaker breaker = breakerMap.get(serverId);
-        if(breaker == null){
+        if (breaker == null) {
             synchronized (String.class) {
                 breaker = breakerMap.get(serverId);
-                if(breaker == null){
-                    CircuitBreakerRegistry registry = CircuitBreakerRegistry.of(defaultBreakerConfig);
-                    breaker= registry.circuitBreaker(serverId);
+                if (breaker == null) {
+                    breaker = DefaultCircuitBreakerUtil.buildDefaultBreaker(serverId);
                     breakerMap.put(serverId, breaker);
                     LOGGER.info("init {} breaker", serverId);
                 }
@@ -110,10 +96,11 @@ public class BreakerGlobalGatewayFilter extends OrderedGlobalFilter {
 
     /**
      * 更新某个业务的breaker
+     *
      * @param serverId
      * @param breaker
      */
-    public void updateBreakerMap(String serverId, CircuitBreaker breaker){
+    public void updateBreakerMap(String serverId, CircuitBreaker breaker) {
         breakerMap.put(serverId, breaker);
     }
 }
