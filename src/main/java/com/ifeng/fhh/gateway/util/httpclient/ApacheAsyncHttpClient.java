@@ -1,5 +1,6 @@
 package com.ifeng.fhh.gateway.util.httpclient;
 
+import com.ifeng.fhh.gateway.route.AbstractRouteDefinitionRepository;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
@@ -13,6 +14,8 @@ import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.nio.conn.ssl.SSLIOSessionStrategy;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
 import javax.net.ssl.SSLContext;
@@ -29,6 +32,8 @@ import java.util.concurrent.CompletableFuture;
  * @Date: 20-9-15
  */
 public class ApacheAsyncHttpClient implements HttpClientTemplate{
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApacheAsyncHttpClient.class);
 
     public static final String DEFAULT_CHARSET = "UTF-8";
 
@@ -242,7 +247,7 @@ public class ApacheAsyncHttpClient implements HttpClientTemplate{
         return new FutureCallback<T>() {
             @Override
             public void completed(T t) {
-                System.out.println(Thread.currentThread().getName()+" wrapCallback");
+                LOGGER.info("http wrapCallback whih thread : {}",Thread.currentThread().getName());
                 future.complete(t);
             }
 
