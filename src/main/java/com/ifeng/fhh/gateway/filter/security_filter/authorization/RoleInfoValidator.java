@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
@@ -59,7 +60,7 @@ public class RoleInfoValidator {
         String token = headers.getFirst(GatewayPropertyUtil.AUTHORITY_MANAGEMENT_SYSTEM_TOKEN);
         String roleId = repository.matchRoleId(serverId, uri);
         LOGGER.info("********** matchRoleId serverId : {}, uri : {}, roleId : {}", serverId, uri, roleId);
-        if (Objects.isNull(roleId)) {
+        if (StringUtils.isEmpty(roleId)) {
             return Mono.just(true);
         } else {
             return checkToken(token, roleId);
