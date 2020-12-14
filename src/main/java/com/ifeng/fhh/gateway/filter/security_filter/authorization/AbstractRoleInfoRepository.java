@@ -3,8 +3,8 @@ package com.ifeng.fhh.gateway.filter.security_filter.authorization;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.CollectionUtils;
 
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -36,7 +36,7 @@ public abstract class AbstractRoleInfoRepository {
      * @param roleInfoMap
      */
     protected final void internalRefresh(String serviceId, ConcurrentHashMap<String, String> roleInfoMap) {
-        if(!CollectionUtils.isEmpty(roleInfoMap)){
+        if(Objects.nonNull(roleInfoMap)){
             roleInfoCache.put(serviceId, roleInfoMap);
             LOGGER.info("********** refresh, serverId : {}, map : {}", serviceId,roleInfoMap.toString());
         }

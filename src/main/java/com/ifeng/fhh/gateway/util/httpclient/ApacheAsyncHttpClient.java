@@ -1,6 +1,5 @@
 package com.ifeng.fhh.gateway.util.httpclient;
 
-import com.ifeng.fhh.gateway.route.AbstractRouteDefinitionRepository;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
