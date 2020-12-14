@@ -31,7 +31,7 @@ public class GlobalFilterReorder implements BeanPostProcessor {
             try {
                 OrderedGlobalFilter orderedGlobalFilter = (OrderedGlobalFilter) bean;
                 orderedGlobalFilter.setOrder(order);
-                LOGGER.info("update filter bean : {}, order: {}", beanClass.getSimpleName(), order);
+                LOGGER.info("************ update filter order: {}, bean : {}", order, beanClass.getSimpleName());
             } catch (Exception e) {
                 e.printStackTrace();
             }
