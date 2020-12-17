@@ -3,6 +3,8 @@ package com.ifeng.fhh.gateway.util;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 
@@ -12,6 +14,8 @@ import java.time.Duration;
  * @Date: 20-12-14
  */
 public class DefaultCircuitBreakerUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCircuitBreakerUtil.class);
 
     private static final CircuitBreakerConfig defaultBreakerConfig = CircuitBreakerConfig.custom()
             .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED) /*固定大小，不做限流就简单点*/
@@ -24,7 +28,15 @@ public class DefaultCircuitBreakerUtil {
 
     public static CircuitBreaker buildDefaultBreaker(String name){
         CircuitBreakerRegistry registry = CircuitBreakerRegistry.of(defaultBreakerConfig);
-        CircuitBreaker breaker = registry.circuitBreaker("name");
+        CircuitBreaker breaker = registry.circuitBreaker(name);
+        LOGGER.info("************* build breaker : {}, {}",name, breaker);
+        return breaker;
+    }
+
+    public static CircuitBreaker buildBreaker(String name, CircuitBreakerConfig breakerConfig){
+        CircuitBreakerRegistry registry = CircuitBreakerRegistry.of(breakerConfig);
+        CircuitBreaker breaker = registry.circuitBreaker(name);
+        LOGGER.info("************ build breaker : {}, {}",name, breaker);
         return breaker;
     }
 }

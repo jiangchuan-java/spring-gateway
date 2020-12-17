@@ -6,9 +6,7 @@ import com.ctrip.framework.apollo.ConfigService;
 import com.ctrip.framework.apollo.model.ConfigChangeEvent;
 import com.ifeng.fhh.gateway.filter.breaker_filter.BreakerGlobalGatewayFilter;
 import com.ifeng.fhh.gateway.util.JackSonUtils;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +17,6 @@ import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * todo 这里应解耦，参考路由定义与注册中心
@@ -40,8 +37,6 @@ public class ApolloBreakerConfigRepository {
     @Autowired
     private BreakerGlobalGatewayFilter breakerGlobalGatewayFilter;
 
-    private ConcurrentHashMap<String/*serverId*/, CircuitBreaker> breakerCache = new ConcurrentHashMap<>();
-
     private static final String SLIDING_WINDOW_TYPE_TIME = "TIME";
 
     private static final String SLIDING_WINDOW_TYPE_COUNT = "COUNT";
@@ -55,10 +50,9 @@ public class ApolloBreakerConfigRepository {
         Set<String> serviceIdSet = apolloConfig.getPropertyNames();
         for (String serviceId : serviceIdSet) {
             String config = apolloConfig.getProperty(serviceId, null);
-            CircuitBreaker breaker = buildCircuitBreaker(serviceId, config);
-            if (Objects.nonNull(breaker)) {
-                breakerCache.put(serviceId, breaker);
-                noticeBreakerFilterUpdate(serviceId, breaker);
+            CircuitBreakerConfig breakerConfig = buildCircuitBreakerConfig(serviceId, config);
+            if (Objects.nonNull(breakerConfig)) {
+                noticeBreakerFilterUpdate(serviceId, breakerConfig);
             }
         }
         apolloConfig.addChangeListener(new BreakerConfigChangeListener());
@@ -70,10 +64,9 @@ public class ApolloBreakerConfigRepository {
      * @param config
      */
     private void updateRepository(String serviceId, String config) {
-        CircuitBreaker breaker = buildCircuitBreaker(serviceId, config);
-        if (Objects.nonNull(breaker)) {
-            breakerCache.put(serviceId, breaker);
-            noticeBreakerFilterUpdate(serviceId, breaker);
+        if (Objects.nonNull(config)) {
+            CircuitBreakerConfig breakerConfig = buildCircuitBreakerConfig(serviceId, config);
+            noticeBreakerFilterUpdate(serviceId, breakerConfig);
         }
     }
 
@@ -81,10 +74,10 @@ public class ApolloBreakerConfigRepository {
      * 更新filter中目前使用的filter
      *
      * @param serviceId
-     * @param breaker
+     * @param breakerConfig
      */
-    private void noticeBreakerFilterUpdate(String serviceId, CircuitBreaker breaker) {
-        breakerGlobalGatewayFilter.updateBreakerMap(serviceId, breaker);
+    private void noticeBreakerFilterUpdate(String serviceId, CircuitBreakerConfig breakerConfig) {
+        breakerGlobalGatewayFilter.updateBreakerMap(serviceId, breakerConfig);
     }
 
     /**
@@ -93,7 +86,7 @@ public class ApolloBreakerConfigRepository {
      * @param
      * @return
      */
-    private CircuitBreaker buildCircuitBreaker(String serviceId, String config) {
+    private CircuitBreakerConfig buildCircuitBreakerConfig(String serviceId, String config) {
         try {
             ApolloBreakerModel breakerModel = JackSonUtils.json2Bean(config, ApolloBreakerModel.class);
             CircuitBreakerConfig.Builder builder = CircuitBreakerConfig.custom();
@@ -107,10 +100,8 @@ public class ApolloBreakerConfigRepository {
             builder = builder.waitDurationInOpenState(Duration.ofSeconds(breakerModel.waitDurationInOpenState));
             builder = builder.permittedNumberOfCallsInHalfOpenState(breakerModel.permittedNumberOfCallsInHalfOpenState);
             CircuitBreakerConfig breakerConfig = builder.build();
-            CircuitBreaker breaker = CircuitBreakerRegistry.of(breakerConfig).circuitBreaker(serviceId);
-            LOGGER.info("build new breaker {} : {}", serviceId, breaker);
 
-            return breaker;
+            return breakerConfig;
         } catch (Exception e) {
             LOGGER.error("serviceId : {}, config : {} build error: {}", e);
         }
