@@ -15,18 +15,31 @@ import com.ifeng.fhh.gateway.filter.stripPrefix_filter.ServerIdExtractGlobalGate
  */
 public enum GlobalFilterOrderDefine {
 
+    /*
+    RemoveCachedBodyFilter - (Integer.MIN_VALUE)
+    AdaptCachedBodyGlobalFilter - (Integer.MIN_VALUE + 1000)
+    NettyWriteResponseFilter - (-1)
+    ForwardPathFilter - (0)
+    */
     //prometheus指标采集filter
     MONITOR_GLOBAL_GATEWAYFILTER(MonitorGlobalGatewayFilter.class, 1),
     //提取serverId的filter
     STRIPPREFIX_GLOBAL_GATEWAYFILTER(ServerIdExtractGlobalGatewayFilter.class, 2),
-
     //安全校验filter
-    SECURITY_GLOBAL_GATEWAYFILTER(TokenValidateGlobalGatewayFilter.class, 4),
+    SECURITY_GLOBAL_GATEWAYFILTER(TokenValidateGlobalGatewayFilter.class, 3),
+    /*
+    RouteToRequestUrlFilter - (1000)
+    */
     //自定义负载均衡filter
     LOADBALANCE_GLOBAL_GATEWAYFILTER(LoadbalanceGlobalGatewayFilter.class, (10150 - 2)),
     //熔断器filter
     BREAKER_GLOBAL_GATEWAYFILTER(BreakerGlobalGatewayFilter.class, (10150 - 1));
-    /*10150是gateway自带lb的filer*/
+    /*
+    ReactiveLoadBalancerClientFilter - (10150)
+    WebsocketRoutingFilter - (Integer.MAX_VALUE - 1)
+    NettyRoutingFilter - (Integer.MAX_VALUE)
+    ForwardRoutingFilter - (Integer.MAX_VALUE)
+    */
 
     private Class clazz;
 
