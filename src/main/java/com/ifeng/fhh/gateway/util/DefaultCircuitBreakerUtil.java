@@ -29,14 +29,14 @@ public class DefaultCircuitBreakerUtil {
     public static CircuitBreaker buildDefaultBreaker(String name){
         CircuitBreakerRegistry registry = CircuitBreakerRegistry.of(defaultBreakerConfig);
         CircuitBreaker breaker = registry.circuitBreaker(name);
-        LOGGER.info("************* build breaker : {}, {}",name, breaker);
+        LOGGER.info("************* build breaker : {}, {}",name, breaker.toString());
         return breaker;
     }
 
     public static CircuitBreaker buildBreaker(String name, CircuitBreakerConfig breakerConfig){
         CircuitBreakerRegistry registry = CircuitBreakerRegistry.of(breakerConfig);
         CircuitBreaker breaker = registry.circuitBreaker(name);
-        LOGGER.info("************ build breaker : {}, {}",name, breaker);
+        LOGGER.info("************ build breaker : {}, {}",name, breaker.toString());
         return breaker;
     }
 }
