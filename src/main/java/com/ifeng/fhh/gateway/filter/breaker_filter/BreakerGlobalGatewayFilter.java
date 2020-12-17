@@ -16,11 +16,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR;
 
 /**
  * @Des: 全局断路器，根据serverId独立断路器
@@ -34,11 +37,10 @@ public class BreakerGlobalGatewayFilter extends OrderedGlobalFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoadbalanceGlobalGatewayFilter.class);
 
-    private ConcurrentHashMap<String/*serverId*/, CircuitBreaker/*熔断器*/> breakerMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String/*host*/, CircuitBreaker/*熔断器*/> breakerMap = new ConcurrentHashMap<>();
 
 
-    @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    public Mono<Void> filter_discard(ServerWebExchange exchange, GatewayFilterChain chain) {
 
         String requestPath = exchange.getRequest().getPath().value();
 
@@ -62,6 +64,43 @@ public class BreakerGlobalGatewayFilter extends OrderedGlobalFilter {
         return chain.filter(exchange)
                 .onErrorResume(throwable -> {
                     LOGGER.error("{} filter error ", serverId, throwable);
+                    long durationInNanos = System.nanoTime() - start;
+                    finalBreaker.onError(durationInNanos, TimeUnit.NANOSECONDS, throwable);
+                    return Mono.error(throwable);
+                }).doOnSuccess(Void -> {
+                    long durationInNanos = System.nanoTime() - start;
+                    finalBreaker.onSuccess(durationInNanos, TimeUnit.NANOSECONDS);
+                });
+    }
+
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+
+        URI url = exchange.getAttribute(GATEWAY_REQUEST_URL_ATTR);
+
+        String host = url.getHost(); // 负载均衡选择的 实例ip
+
+        String requestPath = exchange.getRequest().getPath().value();
+
+
+        CircuitBreaker circuitBreaker = breakerMap.get(host);
+        if (circuitBreaker == null) {
+            circuitBreaker = threadSafeDefaultBreaker(host);
+        }
+
+        long start = System.nanoTime();
+        try {
+            circuitBreaker.acquirePermission();
+        } catch (CallNotPermittedException e) {
+            LOGGER.warn(requestPath + " 熔断!!!!!");
+            return Mono.error(new ServiceUnavailableException());
+        }
+
+        final CircuitBreaker finalBreaker = circuitBreaker; /*内部类，变量需要提前确定好*/
+
+        return chain.filter(exchange)
+                .onErrorResume(throwable -> {
+                    LOGGER.error("{} filter error ", host, throwable);
                     long durationInNanos = System.nanoTime() - start;
                     finalBreaker.onError(durationInNanos, TimeUnit.NANOSECONDS, throwable);
                     return Mono.error(throwable);

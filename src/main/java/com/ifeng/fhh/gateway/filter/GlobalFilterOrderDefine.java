@@ -19,12 +19,14 @@ public enum GlobalFilterOrderDefine {
     MONITOR_GLOBAL_GATEWAYFILTER(MonitorGlobalGatewayFilter.class, 1),
     //提取serverId的filter
     STRIPPREFIX_GLOBAL_GATEWAYFILTER(ServerIdExtractGlobalGatewayFilter.class, 2),
-    //熔断器filter
-    BREAKER_GLOBAL_GATEWAYFILTER(BreakerGlobalGatewayFilter.class, 3),
+
     //安全校验filter
     SECURITY_GLOBAL_GATEWAYFILTER(TokenValidateGlobalGatewayFilter.class, 4),
     //自定义负载均衡filter
-    LOADBALANCE_GLOBAL_GATEWAYFILTER(LoadbalanceGlobalGatewayFilter.class, (10150 - 1)/*10150是gateway自带lb的filer*/);
+    LOADBALANCE_GLOBAL_GATEWAYFILTER(LoadbalanceGlobalGatewayFilter.class, (10150 - 2)),
+    //熔断器filter
+    BREAKER_GLOBAL_GATEWAYFILTER(BreakerGlobalGatewayFilter.class, (10150 - 1));
+    /*10150是gateway自带lb的filer*/
 
     private Class clazz;
 
