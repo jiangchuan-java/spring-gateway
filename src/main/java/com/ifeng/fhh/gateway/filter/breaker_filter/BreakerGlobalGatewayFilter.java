@@ -66,7 +66,7 @@ public class BreakerGlobalGatewayFilter extends OrderedGlobalFilter {
         try {
             circuitBreaker.acquirePermission();
         } catch (CallNotPermittedException e) {
-            LOGGER.warn(requestPath + " 熔断!!!!!");
+            LOGGER.warn(requestPath + " break!!!!!");
             return Mono.error(new ServiceUnavailableException());
         }
 
