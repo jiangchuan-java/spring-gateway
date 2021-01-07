@@ -48,7 +48,8 @@ public class MonitorGlobalGatewayFilter extends OrderedGlobalFilter {
                 requestTimer.observeDuration();
                 long end = System.currentTimeMillis();
                 long contentLength = exchange.getResponse().getHeaders().getContentLength();
-                LOGGER.info("requestPath : {}, signalType : {}, bytes : {}, cos : {}", requestPath, signalType, contentLength, (end-begin));
+                int statusCode = exchange.getResponse().getStatusCode().value();
+                LOGGER.info("requestPath : {}, statusCode : {}, cos : {}", requestPath, statusCode, (end-begin));
             }
         });
     }
