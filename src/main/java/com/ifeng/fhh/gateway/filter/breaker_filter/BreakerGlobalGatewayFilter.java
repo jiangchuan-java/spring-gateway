@@ -74,7 +74,7 @@ public class BreakerGlobalGatewayFilter extends OrderedGlobalFilter {
 
         return chain.filter(exchange)
                 .onErrorResume(throwable -> {
-                    LOGGER.error("{} filter error ", host, throwable);
+                    LOGGER.error("{} filter error ", url, throwable);
                     long durationInNanos = System.nanoTime() - start;
                     finalBreaker.onError(durationInNanos, TimeUnit.NANOSECONDS, throwable);
                     return Mono.error(throwable);
