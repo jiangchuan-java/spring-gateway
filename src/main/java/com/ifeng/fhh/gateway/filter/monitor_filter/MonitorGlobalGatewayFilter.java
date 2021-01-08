@@ -13,6 +13,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SignalType;
 
+import java.net.URI;
 import java.util.function.Consumer;
 
 /**
@@ -39,6 +40,7 @@ public class MonitorGlobalGatewayFilter extends OrderedGlobalFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String requestPath = exchange.getRequest().getPath().value();
+        URI uri = exchange.getRequest().getURI();
         Histogram.Timer requestTimer = requestLatency.labels(requestPath).startTimer();
 
         long begin = System.currentTimeMillis();
@@ -49,7 +51,7 @@ public class MonitorGlobalGatewayFilter extends OrderedGlobalFilter {
                 long end = System.currentTimeMillis();
                 long contentLength = exchange.getResponse().getHeaders().getContentLength();
                 int statusCode = exchange.getResponse().getStatusCode().value();
-                LOGGER.info("requestPath : {}, statusCode : {}, cos : {}", requestPath, statusCode, (end-begin));
+                LOGGER.info("uri : {}, statusCode : {}, cos : {}", uri, statusCode, (end-begin));
             }
         });
     }
