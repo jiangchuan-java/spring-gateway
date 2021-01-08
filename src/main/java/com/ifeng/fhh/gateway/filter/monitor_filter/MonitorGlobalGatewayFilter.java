@@ -49,7 +49,6 @@ public class MonitorGlobalGatewayFilter extends OrderedGlobalFilter {
             public void accept(SignalType signalType) {
                 requestTimer.observeDuration();
                 long end = System.currentTimeMillis();
-                long contentLength = exchange.getResponse().getHeaders().getContentLength();
                 int statusCode = exchange.getResponse().getStatusCode().value();
                 LOGGER.info("uri : {}, statusCode : {}, cos : {}", uri, statusCode, (end-begin));
             }
