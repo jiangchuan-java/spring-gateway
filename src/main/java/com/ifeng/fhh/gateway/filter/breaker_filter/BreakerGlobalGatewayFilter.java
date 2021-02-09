@@ -113,7 +113,6 @@ public class BreakerGlobalGatewayFilter extends OrderedGlobalFilter {
 
         }
         return breaker;
-
     }
 
     /**

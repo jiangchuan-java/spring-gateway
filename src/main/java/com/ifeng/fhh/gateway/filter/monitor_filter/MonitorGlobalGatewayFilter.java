@@ -39,9 +39,10 @@ public class MonitorGlobalGatewayFilter extends OrderedGlobalFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        String requestPath = exchange.getRequest().getPath().value();
         URI uri = exchange.getRequest().getURI();
-        Histogram.Timer requestTimer = requestLatency.labels(requestPath).startTimer();
+        String path = uri.getPath();
+
+        Histogram.Timer requestTimer = requestLatency.labels(path).startTimer();
 
         long begin = System.currentTimeMillis();
         return chain.filter(exchange).doFinally(new Consumer<SignalType>() {
@@ -54,4 +55,5 @@ public class MonitorGlobalGatewayFilter extends OrderedGlobalFilter {
             }
         });
     }
+
 }
