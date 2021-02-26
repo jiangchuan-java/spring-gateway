@@ -27,7 +27,7 @@ public class CorsConfig implements WebFluxConfigurer {
      * {@link org.springframework.web.bind.annotation.CrossOrigin @CrossOrigin}.
      * @see CorsRegistry
      */
-    @Override
+   /* @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins("*")
@@ -35,7 +35,7 @@ public class CorsConfig implements WebFluxConfigurer {
                 .maxAge(10000)
                 .allowedHeaders("*")
                 .allowCredentials(true);
-    }
+    }*/
 
     @Bean
     public CorsWebFilter corsWebFilter(){
