@@ -21,7 +21,7 @@ import static org.springframework.cloud.gateway.support.RouteMetadataUtils.RESPO
 @Configuration
 public class RouteConfiguration {
 
-    @Bean
+    //@Bean
     public RouteLocator myLbRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
                 // Add a simple re-route from: /get to: http://httpbin.org:80

@@ -1,8 +1,11 @@
 package com.ifeng.fhh.gateway.spring.bean;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 
+import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 
@@ -32,6 +35,14 @@ public class CorsConfig implements WebFluxConfigurer {
                 .maxAge(10000)
                 .allowedHeaders("*")
                 .allowCredentials(true);
+    }
+
+    @Bean
+    public CorsWebFilter corsWebFilter(){
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration corsConfiguration = buildConfig();
+        source.registerCorsConfiguration("/**", corsConfiguration);
+        return new CorsWebFilter(source);
     }
 
     private CorsConfiguration buildConfig() {
