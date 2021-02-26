@@ -4,6 +4,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -20,7 +21,7 @@ import static org.springframework.cloud.gateway.support.RouteMetadataUtils.RESPO
 @Configuration
 public class RouteConfiguration {
 
-    //@Bean
+    @Bean
     public RouteLocator myLbRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
                 // Add a simple re-route from: /get to: http://httpbin.org:80
