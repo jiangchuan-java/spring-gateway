@@ -9,7 +9,6 @@
     <version>1.0-SNAPSHOT</version>
 
 
-
     <properties>
         <spring.version>2.2.5.RELEASE</spring.version>
         <resilience4j.version>1.4.0</resilience4j.version>
@@ -155,22 +154,6 @@
 
     <profiles>
         <profile>
-            <id>fhh-gateway-test</id>
-            <properties>
-                <nacos.serverAddr>http://test-nacos.ifeng.com:80</nacos.serverAddr>
-                <nacos.namespace.gateway>74fcd40c-a7c4-4f01-b868-2b5c9ca542ca</nacos.namespace.gateway>
-                <!--apollo config-->
-                <app.id>fhh-gateway</app.id>
-                <apollo.meta>http://meta-dev.config.ifengidc.com</apollo.meta>
-                <apollo.namespace.route-definition>route-definition</apollo.namespace.route-definition>
-                <apollo.namespace.breaker-config>breaker-config</apollo.namespace.breaker-config>
-                <apollo.namespace.uri-role>uri-role</apollo.namespace.uri-role>
-                <!--apollo config-->
-                <authorization.url>https://test0.auth-server.cpdt.ifengidc.com/userRole</authorization.url>
-            </properties>
-        </profile>
-
-        <profile>
             <id>fhh-gateway-prod</id>
             <properties>
                 <nacos.serverAddr>http://nacos.ifeng.com:80</nacos.serverAddr>
@@ -184,6 +167,22 @@
                 <!--apollo config-->
                 <authorization.url>https://auth-server.cpdt.ifengidc.com/userRole</authorization.url>
 
+            </properties>
+        </profile>
+
+        <profile>
+            <id>fhh-gateway-test</id>
+            <properties>
+                <nacos.serverAddr>http://test-nacos.ifeng.com:80</nacos.serverAddr>
+                <nacos.namespace.gateway>74fcd40c-a7c4-4f01-b868-2b5c9ca542ca</nacos.namespace.gateway>
+                <!--apollo config-->
+                <app.id>fhh-gateway</app.id>
+                <apollo.meta>http://meta-dev.config.ifengidc.com</apollo.meta>
+                <apollo.namespace.route-definition>route-definition</apollo.namespace.route-definition>
+                <apollo.namespace.breaker-config>breaker-config</apollo.namespace.breaker-config>
+                <apollo.namespace.uri-role>uri-role</apollo.namespace.uri-role>
+                <!--apollo config-->
+                <authorization.url>https://test0.auth-server.cpdt.ifengidc.com/userRole</authorization.url>
             </properties>
         </profile>
 
@@ -202,6 +201,23 @@
                 <authorization.url>https://auth-server.cpdt.ifengidc.com/userRole</authorization.url>
             </properties>
         </profile>
+
+        <profile>
+            <id>wechat-applet-test</id>
+            <properties>
+                <nacos.serverAddr>http://test-nacos.ifeng.com:80</nacos.serverAddr>
+                <nacos.namespace.gateway>20f59bf2-a896-446c-8710-312a9bce2280</nacos.namespace.gateway>
+                <!--apollo config-->
+                <app.id>wechat-applet-gateway</app.id>
+                <apollo.meta>http://meta-dev.config.ifengidc.com</apollo.meta>
+                <apollo.namespace.route-definition>route-definition</apollo.namespace.route-definition>
+                <apollo.namespace.breaker-config>breaker-config</apollo.namespace.breaker-config>
+                <apollo.namespace.uri-role>uri-role</apollo.namespace.uri-role>
+                <!--apollo config-->
+                <authorization.url>https://test0.auth-server.cpdt.ifengidc.com/userRole</authorization.url>
+            </properties>
+        </profile>
+
     </profiles>
 
 
