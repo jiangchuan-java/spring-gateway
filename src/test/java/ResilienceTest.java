@@ -3,6 +3,9 @@ import io.github.resilience4j.bulkhead.BulkheadConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.ratelimiter.RateLimiter;
+import io.github.resilience4j.ratelimiter.RateLimiterConfig;
+import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.timelimiter.TimeLimiter;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import org.junit.Test;
@@ -157,5 +160,50 @@ public class ResilienceTest {
         }
 
         System.in.read();
+    }
+
+
+    @Test
+    public void rateLimiter() throws Exception {
+        // 创建限流器配置
+        RateLimiterConfig config = RateLimiterConfig.custom()
+                .limitRefreshPeriod(Duration.ofMillis(2000))
+                .limitForPeriod(5)
+                .timeoutDuration(Duration.ofMillis(500))
+                .build();
+
+        // 创建限流器注册器RateLimiterRegistry
+        RateLimiterRegistry rateLimiterRegistry = RateLimiterRegistry.of(config);
+
+        // 通过RateLimiterRegistry来创建限流器
+        RateLimiter rateLimiter = rateLimiterRegistry.rateLimiter("rateLimiter", config);
+
+        RateLimiter.Metrics metrics = rateLimiter.getMetrics();
+
+        rateLimiter.getEventPublisher().onSuccess(event -> {
+            System.out.println(event.getEventType() + ":::可用令牌数: " + metrics.getAvailablePermissions() + ", 等待线程数: "
+                    + metrics.getNumberOfWaitingThreads());
+        }).onFailure(event -> {
+            System.out.println(event.getEventType() + ":::可用令牌数: " + metrics.getAvailablePermissions() + ", 等待线程数: "
+                    + metrics.getNumberOfWaitingThreads());
+        });
+
+
+        TimeUnit.SECONDS.sleep(3);
+        for(int i=0;i<10;i++){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    boolean permission = rateLimiter.acquirePermission(1);
+                    if(permission){
+                        System.out.println(Thread.currentThread().getName()+" acquire success");
+                    }
+                }
+            }).start();
+        }
+
+
+        System.in.read();
+
     }
 }
